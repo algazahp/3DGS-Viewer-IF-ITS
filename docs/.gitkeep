@@ -1,0 +1,5 @@
+// Folder docs — dokumentasi singkat untuk laporan Tugas Akhir
+// Akan berisi:
+//   - arsitektur sistem (diagram flow data frontend ↔ backend ↔ R2)
+//   - panduan setup dan deployment
+//   - catatan teknis tentang format .sog dan PlayCanvas GSplatComponent

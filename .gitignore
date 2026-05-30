@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Environment variables (berisi path lokal & secret)
+.env
+
+# SQLite database (di-generate ulang via seed.js)
+backend/db/viewer.db
+
+# File .sog terlalu besar untuk GitHub (disimpan di R2)
+*.sog
+
+# Claude Code local settings
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
