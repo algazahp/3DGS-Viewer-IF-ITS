@@ -1,0 +1,764 @@
+/* ============================================================
+   Base reset & layout
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0d0d0d;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ============================================================
+   Canvas — PlayCanvas render target, selalu fullscreen
+   ============================================================ */
+#splat-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+}
+
+#splat-canvas:active {
+  cursor: grabbing;
+}
+
+/* ============================================================
+   Overlay — wrapper UI di atas canvas
+   Pointer-events: none agar klik/drag tembus ke canvas,
+   diaktifkan per-elemen yang butuh interaksi.
+   ============================================================ */
+#overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ============================================================
+   FPS counter — tengah atas
+   ============================================================ */
+#fps-counter {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 3px 10px;
+  border-radius: 4px;
+  pointer-events: none;
+  letter-spacing: 0.05em;
+  z-index: 11;
+}
+
+/* ============================================================
+   Info panel — pojok kiri bawah
+   ============================================================ */
+#info-panel {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+#scene-label {
+  font-size: 15px;
+  font-weight: 600;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.02em;
+}
+
+#scene-type {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  backdrop-filter: blur(6px);
+  align-self: flex-start;
+}
+
+/* ============================================================
+   Back button — pojok kiri atas
+   ============================================================ */
+#back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(15, 15, 15, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s ease, border-color 0.2s ease;
+  z-index: 12;
+}
+
+#back-btn:hover {
+  background: rgba(40, 40, 40, 0.85);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.back-arrow {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ============================================================
+   Scene list toggle & panel — pojok kanan atas
+   ============================================================ */
+#scene-list-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 8px 14px;
+  background: rgba(15, 15, 15, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s ease;
+  letter-spacing: 0.03em;
+}
+
+#scene-list-toggle:hover {
+  background: rgba(40, 40, 40, 0.85);
+}
+
+#scene-list {
+  position: absolute;
+  top: 56px;
+  right: 20px;
+  min-width: 220px;
+  background: rgba(15, 15, 15, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 8px;
+  backdrop-filter: blur(12px);
+  pointer-events: auto;
+}
+
+.scene-list-header {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 4px 8px 8px;
+}
+
+.scene-list-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.scene-list-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.scene-list-item.active {
+  background: rgba(41, 182, 246, 0.15);
+  color: #29b6f6;
+}
+
+/* ============================================================
+   Camera hint — pojok kanan bawah, fade in saat scene load, fade out 3 detik
+   ============================================================ */
+#camera-hint {
+  position: absolute;
+  bottom: 64px;
+  right: 20px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  padding: 5px 11px;
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+#camera-hint.visible {
+  opacity: 1;
+}
+
+/* ============================================================
+   Loading screen — full-screen overlay untuk initial load & transisi
+   ============================================================ */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: #0d0d0d;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+#loading-screen.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Spinner */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #29b6f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+#loading-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 280px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Progress bar */
+#progress-bar-container {
+  width: 240px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+#progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #1565c0, #29b6f6);
+  border-radius: 2px;
+  transition: width 0.2s ease;
+}
+
+#loading-percent {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  font-variant-numeric: tabular-nums;
+  min-width: 3ch;
+  text-align: center;
+}
+
+#retry-btn {
+  margin-top: 8px;
+  padding: 8px 20px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
+  color: white;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#retry-btn:hover { background: rgba(255,255,255,0.2); }
+
+/* ============================================================
+   Minimap — pojok kanan bawah, hanya tampil di scene eksterior
+   ============================================================ */
+#minimap {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  width: 200px;
+  background: rgba(10, 10, 10, 0.75);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  transition: width 0.3s ease, height 0.3s ease;
+  user-select: none;
+}
+
+#minimap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.6);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+#minimap-toggle {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+#minimap-toggle:hover { color: white; }
+
+#minimap-fullscreen {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+#minimap-fullscreen:hover { color: white; }
+
+#minimap.is-fullscreen {
+  position: fixed;
+  bottom: auto;
+  right: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(90vw, 900px);
+  max-height: 85vh;
+  z-index: 25;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+
+#minimap.is-fullscreen #minimap-header {
+  flex-shrink: unset;
+}
+
+#minimap.is-fullscreen #minimap-body {
+  max-height: calc(85vh - 40px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#minimap.is-fullscreen #minimap-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: unset;
+  opacity: 1;
+}
+
+#minimap-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 24;
+  cursor: pointer;
+  pointer-events: none;
+}
+
+#minimap-overlay.visible {
+  display: block;
+  pointer-events: auto;
+}
+
+#minimap-body {
+  position: relative;
+  width: 100%;
+}
+
+#minimap-img-wrapper {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+}
+
+#minimap-img {
+  width: 100%;
+  display: block;
+  opacity: 0.85;
+}
+
+#minimap-indicator {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #f6a629;
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(246,166,41,0.8), 0 0 0 3px rgba(246,166,41,0.3);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: left 0.3s ease, top 0.3s ease;
+  animation: pulse-marker 2s infinite;
+}
+
+@keyframes pulse-marker {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(246,166,41,0.8), 0 0 0 3px rgba(246,166,41,0.3);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(246,166,41,1), 0 0 0 6px rgba(246,166,41,0.1);
+  }
+}
+
+#minimap.collapsed #minimap-body {
+  display: none;
+}
+
+#minimap.collapsed {
+  width: auto;
+}
+
+#minimap.is-interior {
+  width: 280px;
+}
+
+#minimap.is-interior #minimap-img {
+  opacity: 0.9;
+}
+
+/* is-fullscreen.is-interior — specificità lebih tinggi, override is-interior width */
+#minimap.is-fullscreen.is-interior {
+  width: min(90vw, 900px);
+}
+
+/* ============================================================
+   Photo Comparison — split-screen foto asli vs render 3DGS
+   ============================================================ */
+#comparison-toggle {
+  position: absolute;
+  top: 60px;
+  left: 20px;
+  padding: 8px 14px;
+  background: rgba(15, 15, 15, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s;
+  z-index: 12;
+}
+
+#comparison-toggle:hover {
+  background: rgba(40, 40, 40, 0.85);
+}
+
+#comparison-toggle, #info-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#comparison-toggle.active {
+  background: rgba(41, 182, 246, 0.2);
+  border-color: #29b6f6;
+  color: #29b6f6;
+}
+
+#photo-comparison {
+  position: absolute;
+  inset: 0;
+  display: none;
+  pointer-events: none;
+  z-index: 5;
+}
+
+#photo-comparison.is-active {
+  display: flex;
+}
+
+#photo-panel {
+  position: relative;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  flex-shrink: 0;
+  pointer-events: auto;
+}
+
+.comparison-label {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 3px 10px;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 2;
+  white-space: nowrap;
+}
+
+#canvas-label {
+  position: absolute;
+  top: 12px;
+  left: 40%;
+  transform: none;
+  z-index: 11;
+  pointer-events: none;
+}
+
+#photo-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  pointer-events: auto;
+  transition: background 0.2s;
+}
+
+#photo-close:hover {
+  background: rgba(200, 50, 50, 0.7);
+}
+
+#comparison-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+#photo-nav {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  padding: 6px 14px;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+#photo-nav button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+#photo-nav button:hover {
+  opacity: 1;
+}
+
+#photo-counter {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  min-width: 40px;
+  text-align: center;
+}
+
+#comparison-divider {
+  width: 4px;
+  background: rgba(255, 255, 255, 0.4);
+  cursor: ew-resize;
+  position: relative;
+  flex-shrink: 0;
+  pointer-events: auto;
+  z-index: 10;
+  transition: background 0.2s;
+}
+
+#comparison-divider:hover {
+  background: #29b6f6;
+}
+
+#divider-handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(90deg);
+  width: 28px;
+  height: 28px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================================
+   Reconstruction Info Panel — toggle button pojok kanan atas, sebelah kiri Scene
+   ============================================================ */
+#info-toggle {
+  position: absolute;
+  top: 20px;
+  right: 120px;
+  padding: 8px 14px;
+  background: rgba(15, 15, 15, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s;
+  z-index: 12;
+}
+
+#info-toggle:hover {
+  background: rgba(40, 40, 40, 0.85);
+}
+
+#info-toggle.active {
+  background: rgba(41, 182, 246, 0.15);
+  border-color: #29b6f6;
+  color: #29b6f6;
+}
+
+#reconstruction-panel {
+  position: absolute;
+  top: 56px;
+  right: 120px;
+  width: 240px;
+  background: rgba(10, 10, 10, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  pointer-events: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  z-index: 12;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.panel-hidden {
+  opacity: 0;
+  pointer-events: none !important;
+  transform: translateY(8px);
+}
+
+#reconstruction-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#info-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+#info-close:hover {
+  color: white;
+}
+
+#reconstruction-body {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-key {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+}
+
+.info-val {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: right;
+}

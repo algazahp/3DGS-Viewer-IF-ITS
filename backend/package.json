@@ -1,0 +1,20 @@
+{
+  "name": "3dgs-viewer-backend",
+  "version": "1.0.0",
+  "description": "Backend API untuk Web Viewer 3D Gaussian Splatting Gedung IF ITS",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node db/seed.js",
+    "seed:prod": "node db/seed-production.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.6.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
