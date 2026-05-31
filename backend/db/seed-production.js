@@ -13,7 +13,7 @@ try {
 
 const db = require('../database');
 
-const R2_URL = 'https://pub-ac5b32f0edac4a9fb2eaa996837e98be.r2.dev';
+const R2_URL = 'https://assets.ifsplat.my.id';
 const baseUrl = R2_URL;
 
 const scenes = [
