@@ -1,6 +1,6 @@
 # Next Steps — Web Viewer 3DGS
 
-> Status per 2026-05-29.
+> Status per 2026-06-01.
 
 ---
 
@@ -59,8 +59,8 @@ Semua 13 scene sudah dikalibrasi.
 ### [x] g. Minimap Interior dengan Denah per Lantai
 Kolom `floor_map TEXT` ditambahkan ke tabel `scenes` via `addColIfNotExists()`.
 Setiap scene menyimpan path gambar denah:
-- `assets/DenahLantai1.webp` → plaza-supenno, kelas-if112, kelas-if105, kelas-if107
-- `assets/DenahLantai2.webp` → aula, ruang-sidang, lounge, ruang-rapat, ruang-dosen-if227, lab-pascasarjana, loby-pascasarjana
+- `assets/DenahLantai1.webp` → plaza-supenno, kelas-if112, kelas-if105, kelas-if107, lab-pascasarjana
+- `assets/DenahLantai2.webp` → aula, ruang-sidang, lounge, ruang-rapat, ruang-dosen-if227, loby-pascasarjana
 - `assets/DenahLantai3.webp` → lab-kcv
 Header minimap menampilkan label lantai per scene (Lantai 1 / Lantai 2 / Lantai 3 / Peta Lokasi).
 
@@ -89,76 +89,110 @@ Tombol Info dipindah ke pojok kanan atas, sebelah kiri tombol Scene
 Sebelumnya minimap hanya tampil untuk scene free camera.
 Orbit camera scene (kelas-if112, ruang-rapat, ruang-dosen-if227) kini juga menampilkan denah.
 
+### [x] m. Mutual Close — Info Panel ↔ Scene List
+Buka panel Info otomatis tutup Scene List, dan sebaliknya.
+`sceneListToggle`: panggil `closeInfoPanel()` sebelum toggle.
+`infoToggle`: set `sceneListEl.hidden = true` sebelum toggle.
+
+### [x] n. Photo Refs untuk Semua 13 Scene
+27 entri di tabel `photo_refs` — semua scene punya minimal 2 foto referensi.
+exterior: 3 foto. Semua 12 scene interior: masing-masing 2 foto.
+
+### [x] o. Isi Data Rekonstruksi Semua 13 Scene
+Semua kolom `splat_count`, `train_time`, `image_count`, `splat_type` sudah terisi
+di `seed.js` dan `seed-production.js` untuk semua 13 scene.
+
+### [x] p. Setup Cloudflare R2 — Upload 13 File .sog
+Bucket R2 aktif. Semua 13 file .sog sudah diupload.
+CDN URL: `https://assets.ifsplat.my.id`
+Public URL: `https://pub-ac5b32f0edac4a9fb2eaa996837e98be.r2.dev`
+DB di-seed dengan CDN URL via `seed-production.js`.
+
+### [x] q. Push ke GitHub Repository
+Repo: `https://github.com/algazahp/3DGS-Viewer-IF-ITS`
+Initial commit: 69 files. Commit kedua: workflow + frontend root copy (50 files).
+`.gitignore` exclude: `.env`, `node_modules`, `viewer.db`, `*.sog`, `.claude/`.
+
+### [x] r. Setup GitHub Pages — Frontend LIVE
+GitHub Actions workflow `.github/workflows/deploy.yml` otomatis copy `frontend/` ke branch `gh-pages`.
+Frontend live di: `https://algazahp.github.io/3DGS-Viewer-IF-ITS/`
+File frontend juga ada di root project untuk GitHub Pages.
+
+### [x] s. Deploy Backend ke Railway ✅
+Backend LIVE di: `https://3dgs-viewer-if-its-production.up.railway.app`
+Railway Hobby plan ($5/bulan). Auto-redeploy saat push ke `main`.
+Auto-seed production dengan CDN URL `https://assets.ifsplat.my.id` saat cold start.
+`NODE_ENV=production` diset di Railway environment variables.
+
+### [x] t. Setup CDN Custom Domain assets.ifsplat.my.id ✅
+Cloudflare R2 bucket `3dgs-splats` diakses via custom domain `assets.ifsplat.my.id`.
+Cache Rule aktif: Edge TTL 1 year, Browser TTL 1 month.
+`cf-cache-status: HIT` confirmed — file .sog di-serve dari edge server Singapore.
+`seed-production.js` hardcode URL CDN baru.
+
+### [x] u. Domain ifsplat.my.id Live ✅
+Domain dibeli di Hostinger (ekstensi .my.id). Nameserver pindah ke Cloudflare.
+DNS Records GitHub Pages: 4× A record (185.199.108–111.153), DNS only.
+Frontend primary: `https://ifsplat.my.id`
+Frontend fallback: `https://algazahp.github.io/3DGS-Viewer-IF-ITS/`
+
+### [x] v. CORS R2 Dikonfigurasi untuk Semua Domain ✅
+R2 bucket CORS rules mencakup `algazahp.github.io` dan `ifsplat.my.id`.
+`ALLOWED_ORIGINS` backend mencakup: localhost:5500, 127.0.0.1:5500,
+localhost:3000, localhost:3001, algazahp.github.io, ifsplat.my.id.
+
+### [x] w. Test End-to-End di ifsplat.my.id ✅
+Semua 13 scene bisa diakses online dari `https://ifsplat.my.id`.
+Photo comparison, panel info rekonstruksi, minimap, back button — semua berfungsi.
+Tidak ada CORS error di browser console.
+CDN cache HIT confirmed setelah load pertama.
+
 ---
 
 ## YANG PERLU DILAKUKAN
 
-### SEGERA
+### PRIORITAS SEKARANG
 
-**[ ] Kalibrasi posisi titik indikator interior (SCENE_MARKER_POS)**
-Nilai saat ini di `scene-manager.js` adalah placeholder — perlu dikalibrasi secara visual.
-Cara: buka scene interior → klik tombol ⛶ untuk fullscreen → lihat posisi titik pada denah
-→ sesuaikan nilai `x` dan `y` di `SCENE_MARKER_POS` sampai titik tepat di posisi ruangan.
+**[ ] Hitung PSNR/SSIM — metrik kualitas rekonstruksi**
+Deadline: sebelum sidang (22 Juni 2026).
+Langkah:
+1. Render minimal 3 frame per scene dari Postshot (pilih sudut berbeda, bukan cherry-pick)
+2. Bandingkan dengan foto referensi COLMAP
+3. Jalankan `tools/calc_metrics.py`
+4. Rata-ratakan hasil per scene
+5. Masukkan ke tabel evaluasi buku TA
+6. (Opsional) tambah kolom `psnr REAL`, `ssim REAL` ke `room_info` via `addColIfNotExists()`
+   dan tampilkan di panel rekonstruksi
 
-**[ ] Tambah foto referensi untuk scene baru yang masih kosong**
-Folder sudah ada, isi dengan 2–3 foto COLMAP per scene, lalu update `seed.js` dan jalankan
-`node db/seed.js --local`:
-```
-frontend/assets/photos/ruang-rapat/
-frontend/assets/photos/ruang-sidang/
-frontend/assets/photos/lounge/
-frontend/assets/photos/ruang-dosen-if227/
-frontend/assets/photos/lab-pascasarjana/
-frontend/assets/photos/loby-pascasarjana/
-frontend/assets/photos/kelas-if105/
-```
-
-**[ ] Isi data rekonstruksi di seed.js untuk scene baru**
-7 scene masih null di kolom splat_count, train_time, image_count, splat_type:
-ruang-rapat, ruang-sidang, lounge, ruang-dosen-if227, lab-pascasarjana,
-loby-pascasarjana, kelas-if105.
-Setelah training selesai: update `seed.js` → `node db/seed.js --local`.
-
-**[ ] Hitung PSNR/SSIM semua scene**
-Script `tools/calc_metrics.py` sudah ada.
-Langkah: ambil render screenshot per scene → bandingkan dengan foto referensi COLMAP
-→ masukkan hasil ke `seed.js` → tambah kolom `psnr REAL`, `ssim REAL` ke `room_info`
-via `addColIfNotExists()` → tampilkan di panel rekonstruksi.
+**[ ] BUKU TA — prioritas utama, deadline sidang 22 Juni 2026**
+- Revisi Bab 1–3 (analisis sudah ada di Project Claude — tinggal eksekusi)
+- Tulis Bab 4 — Hasil & Analisis
+  - Gunakan data dari panel rekonstruksi: splat_count, train_time, image_count, splat_type
+  - Sertakan screenshot viewer per scene
+  - Sertakan hasil PSNR/SSIM setelah dihitung
+- Tulis Bab 5 — Kesimpulan & Saran
+  - Saran pengembangan: lihat bagian OPSIONAL di bawah
 
 ---
 
-### DEPLOYMENT (setelah semua scene + data selesai)
+### SETELAH BIMBINGAN DOSBING
 
-**[ ] Setup Cloudflare R2 — upload semua 13 .sog**
-1. Buat bucket R2 (misal: `3dgs-ifits`)
-2. Upload semua file .sog dari `G:/TugasAkhir/ScriptConvert/`
-3. Enable Public Access → dapat URL `https://pub-xxx.r2.dev`
-4. Verifikasi header `Accept-Ranges: bytes` dari browser
+**[ ] Implementasi saran dari dosbing**
+Tunggu hasil bimbingan sebelum mengubah kode lebih lanjut.
 
-**[ ] node db/seed.js --r2 https://[bucket].r2.dev**
-Jalankan setelah R2 siap untuk update semua `file_url` di DB ke URL R2.
+**[ ] Indikator sensitivitas kecepatan gerak kamera (saran teman)**
+Slider atau indikator visual yang menunjukkan kecepatan gerak kamera saat ini.
 
-**[ ] Deploy backend ke Render.com**
-1. Push repo ke GitHub (pastikan `.env`, `db/viewer.db`, `.sog` ada di `.gitignore`)
-2. Buat Web Service → connect repo → build: `npm install`, start: `node server.js`
-3. Set env vars: `NODE_ENV=production`, `FRONTEND_ORIGIN=https://<username>.github.io`
-4. Seed DB via Render Shell: `node db/seed.js --r2 <R2_URL>`
+**[ ] Vision cone / arah hadap di minimap eksterior (saran teman)**
+Tambah segitiga / cone di atas titik indikator minimap yang menunjukkan arah hadap kamera.
 
-**[ ] Deploy frontend ke GitHub Pages + test end-to-end**
-1. Update `BACKEND_URL` di `scene-manager.js` ke URL Render.com
-2. Push ke GitHub → aktifkan Pages (branch: main, folder: /frontend)
-3. Test: semua 13 scene load dari R2, foto comparison, panel info, minimap, back button
+**[ ] Tambah model ruangan baru jika diminta dosbing**
+Jika ada scene tambahan yang diminta, ikuti alur: rekam → Postshot → convert ke .sog
+→ upload ke R2 → seed.js → kalibrasi cam_pos/cam_yaw/cam_pitch.
 
 ---
 
 ### OPSIONAL (saran pengembangan Bab 5)
-
-**[ ] Label "Anda di sini" di bawah titik indikator**
-Tambah teks kecil di bawah `#minimap-indicator`. Tunggu masukan dosbing apakah diperlukan.
-
-**[ ] Splat budget / unified rendering**
-PlayCanvas mendukung `maxSplats` di GSplatComponent dan mode unified rendering.
-Trade-off performa vs kualitas — diskusikan dengan dosbing sebelum diimplementasi.
 
 **[ ] Streamed LOD untuk eksterior (256 MB)**
 Generate LOD rendah via splat-transform `--decimate`, load dulu ~20 MB lalu swap ke full res.
@@ -166,15 +200,24 @@ Butuh perubahan loader ke `GSplatLod` component.
 
 **[ ] Mobile responsiveness**
 Touch controls sudah ada, tapi layout UI belum dioptimalkan untuk layar kecil.
+Scene eksterior (256 MB) kemungkinan tidak akan bisa jalan di mobile.
+
+**[ ] Cloudflare Smart Tiered Cache**
+Aktifkan Tiered Cache di Cloudflare untuk mengurangi request ke R2 origin.
+Berguna jika traffic meningkat signifikan.
+
+**[ ] Splat budget / unified rendering**
+PlayCanvas mendukung `maxSplats` di GSplatComponent dan mode unified rendering.
+Trade-off performa vs kualitas — diskusikan dengan dosbing sebelum diimplementasi.
 
 ---
 
-## CATATAN PENTING SEBELUM DEPLOY
+## CATATAN PENTING
 
-- Pastikan `.env` ada di `.gitignore` — jangan pernah push ke GitHub
-- Pastikan file `.sog` tidak di-push ke GitHub (terlalu besar, simpan di R2)
-- Update `FRONTEND_ORIGIN` di `backend/.env` dan Render dashboard dengan
-  domain GitHub Pages yang sebenarnya sebelum deploy
-- Jalankan `node db/seed.js --r2 [URL]` di Render Shell setelah deploy backend
-- Test endpoint `/api/scenes/exterior/photos` dari browser setelah deploy
-  untuk pastikan CORS dan path foto berjalan dengan benar
+- `.env` ada di `.gitignore` — tidak pernah di-push ✅
+- File `.sog` tidak di-push ke GitHub (terlalu besar, disimpan di R2) ✅
+- `ALLOWED_ORIGINS` di `server.js` sudah include semua domain aktif ✅
+- `BACKEND_URL` di `scene-manager.js` sudah dinamis — tidak perlu ganti manual ✅
+- Railway auto-redeploy setiap push ke `main` — DB re-seed otomatis saat cold start ✅
+- CDN `assets.ifsplat.my.id` aktif dengan cache 1 year — perubahan file .sog perlu cache purge manual ✅
+- **Deadline daftar sidang: 22 Juni 2026** — fokus ke buku TA dan PSNR/SSIM

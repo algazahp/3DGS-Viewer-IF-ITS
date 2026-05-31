@@ -1,6 +1,6 @@
 # Project Context — Web Viewer 3DGS Gedung Teknik Informatika ITS
 
-> Dibuat: 2026-05-12. Diupdate: 2026-05-29.
+> Dibuat: 2026-05-12. Diupdate: 2026-06-01.
 
 ---
 
@@ -13,9 +13,9 @@
 | Frontend | HTML + Vanilla JS (ES Modules) | Tidak butuh build tool, deploy langsung ke GitHub Pages. |
 | Backend | Node.js + Express | REST API ringan untuk serve metadata scene dari SQLite. |
 | Database | SQLite (better-sqlite3) | Sinkronus, zero-config, cukup untuk data scene statis. |
-| Storage file | Cloudflare R2 | Free 10 GB, zero egress fee. **Belum dikonfigurasi** — saat ini pakai local static via Express `/local-splats`. |
-| Deploy frontend | GitHub Pages (rencana) | Static hosting gratis. |
-| Deploy backend | Render.com free tier (rencana) | Belum di-deploy. |
+| Storage file | Cloudflare R2 | Free 10 GB, zero egress fee. **LIVE** — semua 13 file .sog sudah diupload. CDN via `assets.ifsplat.my.id`. |
+| Deploy frontend | GitHub Pages + Custom Domain | **LIVE** — `https://ifsplat.my.id` (primary) dan `https://algazahp.github.io/3DGS-Viewer-IF-ITS/` (fallback). |
+| Deploy backend | Railway Hobby ($5/bulan) | **LIVE** — `https://3dgs-viewer-if-its-production.up.railway.app` |
 
 **File .sog lokal:** `G:/TugasAkhir/ScriptConvert/`
 - `GedungTCv4Clear.sog` — 256 MB
@@ -34,22 +34,70 @@
 
 ---
 
-## 2. Struktur Folder
+## 2. Status Deployment
+
+| Layanan | URL | Status |
+|---------|-----|--------|
+| GitHub Repository | https://github.com/algazahp/3DGS-Viewer-IF-ITS | ✅ LIVE |
+| Frontend (Custom Domain) | https://ifsplat.my.id | ✅ LIVE |
+| Frontend (GitHub Pages fallback) | https://algazahp.github.io/3DGS-Viewer-IF-ITS/ | ✅ LIVE |
+| Cloudflare R2 — CDN URL | https://assets.ifsplat.my.id | ✅ LIVE — 13 file .sog, cache HIT |
+| Cloudflare R2 — Public URL | https://pub-ac5b32f0edac4a9fb2eaa996837e98be.r2.dev | ✅ LIVE (fallback) |
+| Backend (Railway) | https://3dgs-viewer-if-its-production.up.railway.app | ✅ LIVE |
+
+### Domain & CDN Setup
+- **Domain:** `ifsplat.my.id` (Hostinger, ekstensi .my.id)
+- **Nameserver:** Cloudflare (abdullah + adelaide)
+- **CDN:** Cloudflare edge server Singapore
+  - `assets.ifsplat.my.id` → R2 bucket `3dgs-splats`
+  - Cache Rule aktif: Edge TTL 1 year, Browser TTL 1 month
+  - `cf-cache-status: HIT` confirmed ✅
+  - Speed improvement signifikan: setelah cached CDN jauh lebih cepat dari origin
+- **DNS Records GitHub Pages:** 4× A record (185.199.108–111.153), DNS only
+- **CORS R2:** dikonfigurasi untuk `algazahp.github.io` dan `ifsplat.my.id`
+
+### Perubahan Kode untuk Deployment
+- `seed-production.js` — seed dengan CDN URL hardcoded (`https://assets.ifsplat.my.id`)
+- `db/init.js` — auto-seed saat `NODE_ENV=production` jika DB kosong
+- `server.js` — auto-seed saat cold start production; `ALLOWED_ORIGINS` include semua domain aktif
+- `scene-manager.js` — `BACKEND_URL` dinamis: `localhost:3001` (dev) vs Railway URL (production)
+- `.gitignore` — exclude `.env`, `node_modules`, `viewer.db`, `*.sog`, `.claude/`
+- `.github/workflows/deploy.yml` — GitHub Actions otomatis copy `frontend/` ke branch `gh-pages`
+- File frontend juga ada di root project (`index.html`, `style.css`, `scene-manager.js`, `assets/`, `lib/`)
+
+### Catatan Teknis Deployment
+- **GitHub Actions:** `deploy.yml` otomatis copy `frontend/` ke `gh-pages` saat push ke `main`
+- **BACKEND_URL dinamis:** `localhost:3001` (dev) / Railway URL (production) — cek via `window.location.hostname`
+- **ALLOWED_ORIGINS backend:** `localhost:5500`, `127.0.0.1:5500`, `localhost:3000`, `localhost:3001`, `algazahp.github.io`, `ifsplat.my.id`
+- **Mobile eksterior tidak supported:** file GedungTCv4Clear.sog 256 MB terlalu besar untuk browser mobile
+- **First load lambat** (file besar dari R2), subsequent load cepat karena CDN + browser cache
+- **seed-production.js** hardcode CDN URL: `https://assets.ifsplat.my.id`
+- **Railway** auto-redeploy saat push ke `main`; DB di-seed ulang otomatis saat cold start production
+
+---
+
+## 3. Struktur Folder
 
 ```
 G:/TugasAkhir/Projects/3dgs-viewer/
-├── frontend/
-│   ├── index.html          ✅ canvas, overlay, minimap (#minimap-img-wrapper),
-│   │                          loading screen, photo comparison,
-│   │                          reconstruction info panel, fps counter
-│   ├── style.css           ✅ dark theme, minimap (normal + fullscreen + interior),
-│   │                          retry btn, camera hint, photo comparison,
-│   │                          reconstruction panel, fps counter
-│   ├── scene-manager.js    ✅ PlayCanvas init (WebGPU+WebGL2), dual-mode camera,
-│   │                          minimap (eksterior affine + interior statis),
-│   │                          transitions, photo comparison,
-│   │                          reconstruction info panel, fps counter,
-│   │                          cam_yaw/cam_pitch per scene
+├── index.html          ✅ copy dari frontend/ — diperlukan GitHub Pages dari root
+├── style.css           ✅ copy dari frontend/
+├── scene-manager.js    ✅ copy dari frontend/
+├── assets/             ✅ copy dari frontend/assets/
+├── lib/                ✅ copy dari frontend/lib/
+│
+├── frontend/           ✅ source utama — tetap ada untuk development lokal
+│   ├── index.html          canvas, overlay, minimap (#minimap-img-wrapper),
+│   │                       loading screen, photo comparison,
+│   │                       reconstruction info panel, fps counter
+│   ├── style.css           dark theme, minimap (normal + fullscreen + interior),
+│   │                       retry btn, camera hint, photo comparison,
+│   │                       reconstruction panel, fps counter
+│   ├── scene-manager.js    PlayCanvas init (WebGPU+WebGL2), dual-mode camera,
+│   │                       minimap (eksterior affine + interior statis),
+│   │                       transitions, photo comparison,
+│   │                       reconstruction info panel, fps counter,
+│   │                       cam_yaw/cam_pitch per scene, BACKEND_URL dinamis
 │   └── assets/
 │       ├── minimapinformatika.png   ✅ citra satelit gedung IF ITS (original)
 │       ├── minimapinformatika.webp  ✅ citra satelit gedung IF ITS (compressed)
@@ -63,16 +111,18 @@ G:/TugasAkhir/Projects/3dgs-viewer/
 │           ├── lab-kcv/              ✅ 2 foto
 │           ├── kelas-if112/          ✅ 2 foto
 │           ├── kelas-if107/          ✅ 2 foto
-│           ├── ruang-rapat/          🕐 .gitkeep (foto belum diisi)
-│           ├── ruang-sidang/         🕐 .gitkeep (foto belum diisi)
-│           ├── lounge/               🕐 .gitkeep (foto belum diisi)
-│           ├── ruang-dosen-if227/    🕐 .gitkeep (foto belum diisi)
-│           ├── lab-pascasarjana/     🕐 .gitkeep (foto belum diisi)
-│           ├── loby-pascasarjana/    🕐 .gitkeep (foto belum diisi)
-│           └── kelas-if105/          🕐 .gitkeep (foto belum diisi)
+│           ├── ruang-rapat/          ✅ 2 foto
+│           ├── ruang-sidang/         ✅ 2 foto
+│           ├── lounge/               ✅ 2 foto
+│           ├── ruang-dosen-if227/    ✅ 2 foto
+│           ├── lab-pascasarjana/     ✅ 2 foto
+│           ├── loby-pascasarjana/    ✅ 2 foto
+│           └── kelas-if105/          ✅ 2 foto
 │
 ├── backend/
 │   ├── server.js           ✅ Express + CORS + /health + /local-splats static
+│   │                          + auto-seed saat NODE_ENV=production
+│   │                          + ALLOWED_ORIGINS: localhost, algazahp.github.io, ifsplat.my.id
 │   ├── database.js         ✅ SQLite singleton + schema init (WAL mode)
 │   │                          + addColIfNotExists() untuk migrasi idempoten
 │   │                          + kolom cam_yaw, cam_pitch, floor_map di tabel scenes
@@ -80,16 +130,23 @@ G:/TugasAkhir/Projects/3dgs-viewer/
 │   ├── .env.example        ✅ template konfigurasi
 │   ├── .gitignore          ✅ node_modules, .env, db/viewer.db
 │   ├── package.json        ✅ deps: express, cors, better-sqlite3
+│   │                          scripts: start, dev, seed, seed:prod
 │   ├── routes/
 │   │   └── scenes.js       ✅ GET /api/scenes + GET /api/scenes/:id
 │   │                          + GET /api/scenes/:id/photos
 │   │                          + cam_yaw, cam_pitch, floor_map di response
 │   └── db/
 │       ├── viewer.db       ✅ SQLite database (auto-generated, tidak di-commit)
-│       └── seed.js         ✅ --local / --r2 / placeholder mode
-│                              + 13 scenes terseed
-│                              + cam_yaw, cam_pitch semua scene sudah dikalibrasi
-│                              + floor_map per scene (WebP denah lantai)
+│       ├── seed.js         ✅ --local / --r2 / placeholder mode
+│       │                      + 13 scenes + 27 photo_refs + 13 room_info
+│       │                      + cam_yaw, cam_pitch semua scene sudah dikalibrasi
+│       │                      + floor_map per scene (WebP denah lantai)
+│       ├── seed-production.js ✅ seed dengan CDN URL hardcoded (assets.ifsplat.my.id)
+│       └── init.js         ✅ auto-seed jika DB kosong (dipanggil server.js di production)
+│
+├── .github/
+│   └── workflows/
+│       └── deploy.yml      ✅ GitHub Actions: copy frontend/ → gh-pages branch
 │
 ├── media/
 │   └── minimapinformatika.png  ✅ original resolusi tinggi
@@ -106,15 +163,17 @@ G:/TugasAkhir/Projects/3dgs-viewer/
 
 ---
 
-## 3. Status Fitur
+## 4. Status Fitur
 
 ### Backend — SELESAI ✅
 | File | Status | Catatan |
 |------|--------|---------|
-| `server.js` | ✅ | .env loader manual, CORS multi-origin, /local-splats static |
+| `server.js` | ✅ | .env loader manual, CORS multi-origin, /local-splats static, auto-seed production |
 | `database.js` | ✅ | WAL mode, FK on, tabel: scenes/hotspots/room_info/photo_refs; `addColIfNotExists()` untuk migrasi idempoten; kolom cam_yaw, cam_pitch, floor_map di tabel scenes |
 | `routes/scenes.js` | ✅ | Prepared statements, flat response, endpoint /photos; select kolom rekonstruksi + cam_yaw + cam_pitch + floor_map |
-| `db/seed.js` | ✅ | Flag --local, --r2, placeholder; 13 scenes terseed; semua cam_yaw dan cam_pitch terkalibrasi; floor_map per scene (path WebP denah lantai) |
+| `db/seed.js` | ✅ | Flag --local, --r2, placeholder; 13 scenes terseed; semua cam_yaw dan cam_pitch terkalibrasi; floor_map per scene; 27 photo_refs |
+| `db/seed-production.js` | ✅ | CDN URL hardcoded `https://assets.ifsplat.my.id` untuk deployment production |
+| `db/init.js` | ✅ | Auto-seed jika DB kosong; dipanggil saat cold start production |
 | `.env` | ✅ | PORT=3001, LOCAL_SPLAT_DIR=G:/TugasAkhir/ScriptConvert |
 
 ### Frontend — SELESAI ✅
@@ -141,6 +200,8 @@ G:/TugasAkhir/Projects/3dgs-viewer/
 | Photo Comparison | ✅ | Split-screen foto asli vs render 3DGS |
 | Panel Informasi Rekonstruksi | ✅ | Tombol "Info" + SVG icon, pojok kanan atas sebelah kiri tombol Scene (top: 20px, right: 120px) |
 | FPS Counter | ✅ | Tengah atas, update 500ms, warna hijau/kuning/merah |
+| Mutual close Info ↔ Scene List | ✅ | Buka satu panel otomatis tutup panel lain |
+| BACKEND_URL dinamis | ✅ | localhost:3001 (dev) vs Railway URL (production) |
 
 ### Photo Comparison — Detail ✅
 | Sub-fitur | Status | Catatan |
@@ -201,16 +262,16 @@ G:/TugasAkhir/Projects/3dgs-viewer/
 | exterior | 18.100.000 | 64 jam 50 menit | 2800 | Splat3 |
 | plaza-supenno | 8.000.000 | 53 menit 14 detik | 800 | Splat MCMC |
 | aula | 8.000.000 | 1 Jam 26 Menit | 1000 | Splat MCMC |
-| lab-kcv | 8.000.000 | 34 Menit 18 detik | 500 | Splat3 |
+| lab-kcv | 8.000.000 | 1 Jam 54 Menit | 800 | Splat3 |
 | kelas-if112 | 5.000.000 | 1 jam 16 menit | 700 | Splat MCMC |
 | kelas-if107 | 8.000.000 | 1 Jam 47 Menit | 889 | Splat MCMC |
-| ruang-rapat | null | null | null | null |
-| ruang-sidang | null | null | null | null |
-| lounge | null | null | null | null |
-| ruang-dosen-if227 | null | null | null | null |
-| lab-pascasarjana | null | null | null | null |
-| loby-pascasarjana | null | null | null | null |
-| kelas-if105 | null | null | null | null |
+| ruang-rapat | 5.000.000 | 26 Menit 20 Detik | 500 | Splat MCMC |
+| ruang-sidang | 8.000.000 | 58 Menit 51 Detik | 800 | Splat MCMC |
+| lounge | 8.000.000 | 1 Jam 50 Menit | 1000 | Splat MCMC |
+| ruang-dosen-if227 | 8.000.000 | 34 Menit 9 Detik | 600 | Splat MCMC |
+| lab-pascasarjana | 8.000.000 | 52 Menit 44 Detik | 1000 | Splat MCMC |
+| loby-pascasarjana | 5.000.000 | 1 Jam 10 Menit | 600 | Splat MCMC |
+| kelas-if105 | 8.000.000 | 54 Menit 18 Detik | 800 | Splat MCMC |
 
 ### Scene Data
 | # | Scene ID | Label | File .sog | cam_pos | cam_yaw | cam_pitch | camera | floor_map |
@@ -223,18 +284,19 @@ G:/TugasAkhir/Projects/3dgs-viewer/
 | 6 | lounge | Lounge | Lounge.sog | x=-4.323, y=0.152, z=0.317 | 4.4216 | -0.0660 | free | DenahLantai2.webp |
 | 7 | ruang-dosen-if227 | Ruang Dosen IF-227 | RuangDosenv1.sog | x=-0.702, y=0.534, z=-3.037 | 4.4216 | -0.0660 | orbit | DenahLantai2.webp |
 | 8 | lab-kcv | Lab KCV | LabKCV.sog | x=1.193, y=0.292, z=1.254 | 0.7076 | -0.0800 | free | DenahLantai3.webp |
-| 9 | lab-pascasarjana | Lab Pascasarjana | LabPascasarjana.sog | x=-0.980, y=-0.278, z=5.010 | 0.3016 | 0.0820 | free | DenahLantai2.webp |
+| 9 | lab-pascasarjana | Lab Pascasarjana | LabPascasarjana.sog | x=-0.980, y=-0.278, z=5.010 | 0.3016 | 0.0820 | free | DenahLantai1.webp |
 | 10 | loby-pascasarjana | Loby Pascasarjana | LobyPascasarjana.sog | x=2.851, y=0.161, z=4.158 | 1.0676 | -0.0480 | free | DenahLantai2.webp |
 | 11 | kelas-if112 | Ruang Kelas IF-112 | IF112_7MeiClear.sog | x=2.403, y=0.240, z=2.042 | 2.9796 | -0.0140 | orbit | DenahLantai1.webp |
 | 12 | kelas-if105 | Kelas IF-105 | IF105.sog | x=4.995, y=0.513, z=0.244 | 1.4976 | -0.0640 | free | DenahLantai1.webp |
 | 13 | kelas-if107 | Smart Classroom IF-107 | IF107SmartClassroom.sog | x=0.923, y=0.263, z=4.066 | 5.9696 | -0.0380 | free | DenahLantai1.webp |
 
-Total: 13 scenes, 13 photo_refs, 2 hotspots terseed.
-R2 URL belum dikonfigurasi — semua pakai local-splats.
+Total: 13 scenes, 27 photo_refs, 2 hotspots terseed.
+CDN URL: `https://assets.ifsplat.my.id`
+R2 Public URL: `https://pub-ac5b32f0edac4a9fb2eaa996837e98be.r2.dev`
 
 ---
 
-## 4. Bug yang Sudah Di-fix
+## 5. Bug yang Sudah Di-fix
 
 | Bug | Gejala | Fix | Lokasi |
 |-----|--------|-----|--------|
@@ -251,7 +313,7 @@ R2 URL belum dikonfigurasi — semua pakai local-splats.
 
 ---
 
-## 5. Arsitektur Kamera
+## 6. Arsitektur Kamera
 
 ### Penentuan mode kamera
 ```javascript
@@ -330,7 +392,7 @@ app = new pc.Application(canvas, { graphicsDevice: device });
 
 ---
 
-## 6. Arsitektur Minimap
+## 7. Arsitektur Minimap
 
 ### Minimap Eksterior
 Menggunakan **affine transform** (bukan bounding-box sederhana) untuk mapping world coords → UV minimap.
@@ -361,26 +423,26 @@ Indikator posisi **statis** — set sekali saat `loadScene()` berdasarkan `SCENE
 
 ```javascript
 const SCENE_MARKER_POS = {
-  'plaza-supenno':     { x: 0.50, y: 0.78 },
-  'kelas-if112':       { x: 0.12, y: 0.42 },
-  'kelas-if105':       { x: 0.82, y: 0.72 },
-  'kelas-if107':       { x: 0.45, y: 0.92 },
-  'aula':              { x: 0.35, y: 0.88 },
-  'ruang-sidang':      { x: 0.58, y: 0.88 },
-  'lounge':            { x: 0.78, y: 0.88 },
-  'ruang-rapat':       { x: 0.82, y: 0.68 },
-  'ruang-dosen-if227': { x: 0.10, y: 0.58 },
-  'lab-pascasarjana':  { x: 0.82, y: 0.20 },
-  'loby-pascasarjana': { x: 0.82, y: 0.30 },
-  'lab-kcv':           { x: 0.82, y: 0.45 },
+  'plaza-supenno':     { x: 0.50, y: 0.71 },
+  'kelas-if112':       { x: 0.12, y: 0.40 },
+  'kelas-if105':       { x: 0.84, y: 0.61 },
+  'kelas-if107':       { x: 0.45, y: 0.89 },
+  'aula':              { x: 0.53, y: 0.90 },
+  'ruang-sidang':      { x: 0.62, y: 0.88 },
+  'lounge':            { x: 0.76, y: 0.93 },
+  'ruang-rapat':       { x: 0.95, y: 0.69 },
+  'ruang-dosen-if227': { x: 0.08, y: 0.49 },
+  'lab-pascasarjana':  { x: 0.12, y: 0.62 },
+  'loby-pascasarjana': { x: 0.86, y: 0.69 },
+  'lab-kcv':           { x: 0.82, y: 0.49 },
 };
 ```
 
 Mapping scene → gambar denah:
 | Gambar | Scene |
 |--------|-------|
-| `assets/DenahLantai1.webp` | plaza-supenno, kelas-if112, kelas-if105, kelas-if107 |
-| `assets/DenahLantai2.webp` | aula, ruang-sidang, lounge, ruang-rapat, ruang-dosen-if227, lab-pascasarjana, loby-pascasarjana |
+| `assets/DenahLantai1.webp` | plaza-supenno, kelas-if112, kelas-if105, kelas-if107, lab-pascasarjana |
+| `assets/DenahLantai2.webp` | aula, ruang-sidang, lounge, ruang-rapat, ruang-dosen-if227, loby-pascasarjana |
 | `assets/DenahLantai3.webp` | lab-kcv |
 
 Label header minimap per scene:
@@ -391,12 +453,12 @@ const FLOOR_LABEL = {
   'kelas-if112':       'Lantai 1',
   'kelas-if105':       'Lantai 1',
   'kelas-if107':       'Lantai 1',
+  'lab-pascasarjana':  'Lantai 1',
   'aula':              'Lantai 2',
   'ruang-sidang':      'Lantai 2',
   'lounge':            'Lantai 2',
   'ruang-rapat':       'Lantai 2',
   'ruang-dosen-if227': 'Lantai 2',
-  'lab-pascasarjana':  'Lantai 2',
   'loby-pascasarjana': 'Lantai 2',
   'lab-kcv':           'Lantai 3',
 };
@@ -430,13 +492,14 @@ maupun fullscreen.
 
 ---
 
-## 7. API Reference
+## 8. API Reference
 
 **Base URL (dev):** `http://localhost:3001`
+**Base URL (prod):** `https://3dgs-viewer-if-its-production.up.railway.app` ✅ LIVE
 
 ### GET /health
 ```json
-{ "status": "ok", "timestamp": "2026-05-29T..." }
+{ "status": "ok", "timestamp": "2026-06-01T..." }
 ```
 
 ### GET /api/scenes
@@ -463,7 +526,7 @@ maupun fullscreen.
 {
   "id": "exterior",
   "label": "Gedung Teknik Informatika ITS",
-  "file_url": "http://localhost:3001/local-splats/GedungTCv4Clear.sog",
+  "file_url": "https://assets.ifsplat.my.id/GedungTCv4Clear.sog",
   "back_to": null,
   "cam_pos": { "x": -0.074, "y": -1.213, "z": -3.167 },
   "cam_rot": { "x": 0, "y": 0, "z": 0 },
@@ -497,7 +560,7 @@ Diurutkan berdasarkan `display_order`. Kosong `[]` jika scene tidak punya foto.
 
 ---
 
-## 8. Perintah Terminal yang Sering Dipakai
+## 9. Perintah Terminal yang Sering Dipakai
 
 ```bash
 # Jalankan backend
@@ -507,8 +570,11 @@ node server.js
 # Seed database — mode lokal
 node db/seed.js --local
 
-# Seed database — mode R2 (setelah setup Cloudflare)
-node db/seed.js --r2 https://pub-xxx.r2.dev
+# Seed database — mode CDN
+node db/seed.js --r2 https://assets.ifsplat.my.id
+
+# Seed database — production (CDN URL hardcoded)
+node db/seed-production.js
 
 # Jalankan frontend
 npx serve G:/TugasAkhir/Projects/3dgs-viewer/frontend -p 5500
@@ -522,11 +588,15 @@ node tools/compress-minimap.js
 # Compress denah lantai PNG → WebP
 node tools/compress-denah.js
 
-# Test endpoint
+# Test endpoint lokal
 curl http://localhost:3001/health
 curl http://localhost:3001/api/scenes
 curl http://localhost:3001/api/scenes/exterior
 curl http://localhost:3001/api/scenes/exterior/photos
+
+# Test endpoint production
+curl https://3dgs-viewer-if-its-production.up.railway.app/health
+curl https://3dgs-viewer-if-its-production.up.railway.app/api/scenes
 ```
 
 ### Console helpers (browser DevTools)
@@ -538,34 +608,16 @@ window.__app          // akses langsung ke PlayCanvas Application instance
 window.__pc           // akses langsung ke PlayCanvas module
 ```
 
-**Output `getCamera()`:**
-```
-cam_pos:  { x: -0.074, y: -1.213, z: -3.167 }
-cam_yaw:   2.9796
-cam_pitch: -0.0140
-```
-
-**Output `setHome()`:**
-```
-Update seed.js untuk scene 'exterior':
-cam_pos_x: -0.074,
-cam_pos_y: -1.213,
-cam_pos_z: -3.167,
-cam_yaw:   2.9796,
-cam_pitch: -0.0140,
-
-Jalankan: node db/seed.js --local
-```
-
 ---
 
-## 9. Catatan Teknis
+## 10. Catatan Teknis
 
 ### FPS dan Performa
 - FPS lebih tinggi di scene terbuka (eksterior, plaza) bukan karena splat lebih sedikit,
   tapi karena kamera berada jauh dari model sehingga jumlah splat dalam field of view lebih sedikit.
 - Eksterior: 18.1 juta splat. Kelas-if112: 5 juta splat. Sebagian besar scene: 8 juta splat.
-- Scene baru (ruang-rapat, ruang-sidang, lounge, dll) belum diketahui jumlah splatnya.
+- Mobile tidak supported untuk scene eksterior (262 MB terlalu besar untuk browser mobile).
+- First load lambat (file besar dari R2), subsequent load cepat karena CDN cache + browser cache.
 
 ### Splat Budget (maxSplats) — Belum Diimplementasi
 - PlayCanvas GSplatComponent mendukung parameter `maxSplats` untuk membatasi jumlah splat yang dirender.
@@ -576,14 +628,29 @@ Jalankan: node db/seed.js --local
 - PlayCanvas mendukung mode rendering unified untuk scene kompleks.
 - **Perlu diskusi dengan dosbing** sebelum diaktifkan.
 
+### Catatan Vercel — TIDAK Compatible
+Backend ini **tidak compatible** dengan Vercel serverless karena:
+- Menggunakan `app.listen()` (Vercel butuh `module.exports = app`)
+- `better-sqlite3` adalah native addon — binary Windows tidak jalan di Linux Vercel
+- SQLite menulis ke filesystem lokal — Vercel filesystem read-only
+- Gunakan **Railway** atau Render.com untuk deployment backend ini.
+
+### Saran Pengembangan dari Feedback (untuk Bab 5 TA)
+- Indikator sensitivitas kecepatan gerak kamera
+- Vision cone / arah hadap di minimap eksterior
+- Streamed LOD untuk eksterior 18 juta splat (GSplatLod component)
+- Mobile responsiveness (touch layout belum dioptimalkan)
+- Cloudflare Smart Tiered Cache
+
 ---
 
-## 10. Konfigurasi yang Perlu Diganti Sebelum Deploy
+## 11. Konfigurasi Dev vs Production
 
 | File | Nilai dev | Nilai prod |
 |------|-----------|------------|
-| `backend/.env` → `PORT` | `3001` | diset otomatis oleh Render.com |
+| `backend/.env` → `PORT` | `3001` | diset otomatis oleh Railway |
 | `backend/.env` → `LOCAL_SPLAT_DIR` | `G:/TugasAkhir/ScriptConvert` | tidak dipakai di prod |
-| `backend/.env` → `FRONTEND_ORIGIN` | `http://127.0.0.1:5500` | `https://<username>.github.io` |
-| `frontend/scene-manager.js` → `BACKEND_URL` | `http://localhost:3001` | URL Render.com |
-| `backend/db/seed.js` → R2 URL | (pakai --r2 flag) | `https://pub-xxx.r2.dev` |
+| `backend/.env` → `FRONTEND_ORIGIN` | `http://127.0.0.1:5500` | sudah tidak diperlukan — ALLOWED_ORIGINS sudah include semua domain |
+| `scene-manager.js` → `BACKEND_URL` | `http://localhost:3001` (auto via hostname check) | `https://3dgs-viewer-if-its-production.up.railway.app` (auto) |
+| `db/seed.js` → R2 URL | pakai flag `--local` atau `--r2 https://assets.ifsplat.my.id` | gunakan `seed-production.js` |
+| `db/seed-production.js` → `R2_URL` | — | `https://assets.ifsplat.my.id` (hardcoded) |
