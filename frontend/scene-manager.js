@@ -6,7 +6,7 @@ window.__pc = pc;
 // ============================================================
 const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:3001'
-  : 'https://3dgs-viewer-backend.onrender.com';
+  : 'https://3dgs-viewer-if-its-production.up.railway.app';
 
 // 6 titik kalibrasi: world coords (wx, wz) → minimap UV (mu, mv)
 // mu=0 kiri, mu=1 kanan, mv=0 atas, mv=1 bawah
