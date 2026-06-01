@@ -1,6 +1,6 @@
 # Next Steps — Web Viewer 3DGS
 
-> Status per 2026-06-01.
+> Status per 2026-06-02.
 
 ---
 
@@ -147,29 +147,39 @@ Photo comparison, panel info rekonstruksi, minimap, back button — semua berfun
 Tidak ada CORS error di browser console.
 CDN cache HIT confirmed setelah load pertama.
 
+### [x] x. Script calc_metrics.py Dibuat dan Berjalan ✅
+`tools/calc_metrics.py` — hitung PSNR dan SSIM via opencv-python + scikit-image.
+Mode 1 (satu scene): `python calc_metrics.py <scene_id> <ref_folder> <render_folder>`
+Mode 2 (semua scene): `python calc_metrics.py --all <base_ref> <base_render>`
+Output: tabel per pasang gambar + rata-rata per scene + ringkasan dengan label kualitas.
+
+### [x] y. Evaluasi PSNR/SSIM 12 Scene Interior Selesai ✅
+Semua 12 scene interior sudah dievaluasi. Rata-rata: PSNR 11.71 dB, SSIM 0.5905.
+SSIM tertinggi: kelas-if112 (0.7075). SSIM terendah: kelas-if107 (0.5214).
+Scene exterior di-skip — background langit hitam akibat pruning tidak representatif.
+Hasil lengkap di PROJECT_CONTEXT.md bagian 11.
+
 ---
 
 ## YANG PERLU DILAKUKAN
 
 ### PRIORITAS SEKARANG
 
-**[ ] Hitung PSNR/SSIM — metrik kualitas rekonstruksi**
-Deadline: sebelum sidang (22 Juni 2026).
-Langkah:
-1. Render minimal 3 frame per scene dari Postshot (pilih sudut berbeda, bukan cherry-pick)
-2. Bandingkan dengan foto referensi COLMAP
-3. Jalankan `tools/calc_metrics.py`
-4. Rata-ratakan hasil per scene
-5. Masukkan ke tabel evaluasi buku TA
-6. (Opsional) tambah kolom `psnr REAL`, `ssim REAL` ke `room_info` via `addColIfNotExists()`
-   dan tampilkan di panel rekonstruksi
+**[ ] Evaluasi PSNR/SSIM scene exterior**
+Scene exterior di-skip karena background langit hitam akibat pruning.
+Opsi penyelesaian:
+1. Pakai model sebelum pruning (jika render tersedia)
+2. Crop area gedung saja, tanpa area langit
+Setelah render siap: `python tools/calc_metrics.py exterior <ref_folder> <render_folder>`
 
 **[ ] BUKU TA — prioritas utama, deadline sidang 22 Juni 2026**
-- Revisi Bab 1–3 (analisis sudah ada di Project Claude — tinggal eksekusi)
+- Revisi Bab 1–3 (di Project Claude)
 - Tulis Bab 4 — Hasil & Analisis
-  - Gunakan data dari panel rekonstruksi: splat_count, train_time, image_count, splat_type
+  - Masukkan tabel PSNR/SSIM yang sudah ada (12 scene interior, rata-rata 11.71 dB / 0.5905)
+  - Tambah perbandingan visual foto vs render (pakai fitur Photo Comparison)
+  - Analisis kualitas per scene: SSIM lebih representatif dari PSNR untuk kondisi ini
   - Sertakan screenshot viewer per scene
-  - Sertakan hasil PSNR/SSIM setelah dihitung
+  - Tambahkan hasil exterior setelah evaluasi selesai
 - Tulis Bab 5 — Kesimpulan & Saran
   - Saran pengembangan: lihat bagian OPSIONAL di bawah
 
