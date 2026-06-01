@@ -1,6 +1,6 @@
 # Project Context — Web Viewer 3DGS Gedung Teknik Informatika ITS
 
-> Dibuat: 2026-05-12. Diupdate: 2026-06-01.
+> Dibuat: 2026-05-12. Diupdate: 2026-06-02.
 
 ---
 
@@ -154,7 +154,7 @@ G:/TugasAkhir/Projects/3dgs-viewer/
 ├── tools/
 │   ├── compress-minimap.js ✅ script konversi minimapinformatika PNG → WebP
 │   ├── compress-denah.js   ✅ script konversi DenahLantai1/2/3 PNG → WebP via sharp
-│   └── calc_metrics.py     ✅ script hitung PSNR dan SSIM (belum dijalankan)
+│   └── calc_metrics.py     ✅ script hitung PSNR dan SSIM — 12 scene interior SELESAI
 │
 └── docs/
     ├── PROJECT_CONTEXT.md  ✅ file ini
@@ -644,7 +644,51 @@ Backend ini **tidak compatible** dengan Vercel serverless karena:
 
 ---
 
-## 11. Konfigurasi Dev vs Production
+## 11. Evaluasi Kualitas Rekonstruksi
+
+### Setup
+- **Script:** `tools/calc_metrics.py` (opencv-python, numpy, scikit-image)
+- **Metrik:** PSNR (dB) dan SSIM
+- **LPIPS:** tidak diimplementasikan — justified di buku TA (memerlukan GPU inference, tidak proporsional untuk scope TA ini)
+- **Folder render:** `G:/TugasAkhir/Metrics/renders/`
+- **Foto referensi:** `frontend/assets/photos/` (foto COLMAP per scene)
+
+### Hasil Evaluasi 12 Scene Interior ✅
+
+| Scene | PSNR (dB) | SSIM | Keterangan |
+|-------|-----------|------|------------|
+| plaza-supenno | 13.26 | 0.6036 | |
+| aula | 13.61 | 0.5230 | |
+| ruang-rapat | 10.80 | 0.6521 | SSIM tertinggi kedua |
+| ruang-sidang | 11.18 | 0.5543 | |
+| lounge | 12.82 | 0.6024 | |
+| ruang-dosen-if227 | 10.98 | 0.6057 | |
+| lab-kcv | 9.68 | 0.5514 | PSNR terendah |
+| lab-pascasarjana | 11.48 | 0.5936 | |
+| loby-pascasarjana | 12.33 | 0.6421 | |
+| kelas-if112 | 12.28 | 0.7075 | SSIM tertinggi |
+| kelas-if105 | 12.05 | 0.5292 | |
+| kelas-if107 | 10.08 | 0.5214 | SSIM terendah |
+| **Rata-rata** | **11.71** | **0.5905** | |
+
+### Status Scene Exterior
+- **Status:** BELUM — di-skip sementara
+- **Alasan:** background langit hitam akibat pruning menyebabkan nilai metrik tidak representatif
+- **Opsi penyelesaian:**
+  1. Pakai model sebelum pruning (jika tersedia)
+  2. Crop area gedung saja, tanpa area langit
+
+### Catatan Evaluasi
+- Nilai PSNR rendah (9–14 dB) dipengaruhi: ketidakidentikan sudut kamera, perbedaan pencahayaan, dan objek dinamis (orang lewat, bayangan bergerak)
+- **SSIM lebih representatif** untuk kondisi evaluasi ini — mengukur kemiripan struktural, lebih robust terhadap perbedaan exposure
+- SSIM tertinggi: `kelas-if112` (0.7075) — ruangan tertutup, pencahayaan konsisten
+- SSIM terendah: `kelas-if107` (0.5214)
+- PSNR terendah: `lab-kcv` (9.68 dB)
+- Perintah evaluasi: `python tools/calc_metrics.py --all G:/TugasAkhir/Projects/3dgs-viewer/frontend/assets/photos G:/TugasAkhir/Metrics/renders`
+
+---
+
+## 12. Konfigurasi Dev vs Production
 
 | File | Nilai dev | Nilai prod |
 |------|-----------|------------|
