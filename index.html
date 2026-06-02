@@ -29,6 +29,51 @@
     <!-- Overlay gelap saat minimap fullscreen -->
     <div id="minimap-overlay"></div>
 
+    <!-- Overlay + modal panduan navigasi -->
+    <div id="guide-overlay"></div>
+
+    <div id="guide-modal">
+      <div id="guide-header">
+        <span>Panduan Navigasi</span>
+        <button id="guide-close">✕</button>
+      </div>
+      <div id="guide-body">
+
+        <div class="guide-section">
+          <div class="guide-section-title">Kamera Bebas (Free Camera)</div>
+          <div class="guide-section-note">Berlaku untuk scene eksterior dan sebagian besar scene interior</div>
+          <table class="guide-table">
+            <tr><td class="guide-key">Klik layar</td><td>Mulai navigasi, kursor terkunci</td></tr>
+            <tr><td class="guide-key">W / A / S / D</td><td>Maju / kiri / mundur / kanan</td></tr>
+            <tr><td class="guide-key">Mouse</td><td>Arahkan pandangan kamera</td></tr>
+            <tr><td class="guide-key">Scroll ↑</td><td>Tambah kecepatan gerak</td></tr>
+            <tr><td class="guide-key">Scroll ↓</td><td>Kurangi kecepatan gerak</td></tr>
+            <tr><td class="guide-key">Shift</td><td>Sprint — gerak lebih cepat</td></tr>
+            <tr><td class="guide-key">ESC</td><td>Lepas kursor, berhenti navigasi</td></tr>
+          </table>
+        </div>
+
+        <div class="guide-section">
+          <div class="guide-section-title">Kamera Orbit (Orbit Camera)</div>
+          <div class="guide-section-note">Berlaku untuk Ruang Rapat, Ruang Dosen IF-227, Ruang Kelas IF-112</div>
+          <table class="guide-table">
+            <tr><td class="guide-key">Drag mouse</td><td>Putar kamera mengelilingi objek</td></tr>
+            <tr><td class="guide-key">Scroll ↑ / ↓</td><td>Zoom in / zoom out</td></tr>
+          </table>
+        </div>
+
+        <div class="guide-section">
+          <div class="guide-section-title">Ganti Scene</div>
+          <table class="guide-table">
+            <tr><td class="guide-key">Tombol Scene</td><td>Buka daftar semua scene</td></tr>
+            <tr><td class="guide-key">Klik scene</td><td>Pindah ke scene yang dipilih</td></tr>
+            <tr><td class="guide-key">Tombol Kembali</td><td>Kembali ke scene eksterior</td></tr>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
     <!-- Minimap pojok kanan bawah — hanya tampil di scene eksterior -->
     <div id="minimap">
       <div id="minimap-header">
@@ -46,6 +91,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Tombol Panduan navigasi, sebelah kiri tombol Info -->
+    <button id="guide-toggle" title="Panduan navigasi">? Panduan</button>
 
     <!-- Info Rekonstruksi toggle button + panel, pojok kanan atas sebelah kiri Scene -->
     <button id="info-toggle" title="Info Rekonstruksi">

@@ -139,6 +139,10 @@ const photoPrev = document.getElementById('photo-prev');
 const photoNext = document.getElementById('photo-next');
 const divider = document.getElementById('comparison-divider');
 const photoClose = document.getElementById('photo-close');
+const guideToggle = document.getElementById('guide-toggle');
+const guideModal = document.getElementById('guide-modal');
+const guideOverlay = document.getElementById('guide-overlay');
+const guideClose = document.getElementById('guide-close');
 
 // ============================================================
 // Loading screen helpers
@@ -256,6 +260,7 @@ function unloadCurrentScene() {
 async function loadScene(sceneId) {
   closeComparison();
   closeInfoPanel();
+  closeGuide();
   if (isMinimapFullscreen) toggleMinimapFullscreen();
 
   // 1. Metadata dari backend
@@ -378,6 +383,11 @@ async function loadScene(sceneId) {
   }
 
   minimapEl.style.display = 'block';
+
+  if (!hasShownGuide && sceneData.id === 'exterior') {
+    hasShownGuide = true;
+    setTimeout(() => openGuide(), 800);
+  }
 }
 
 // ============================================================
@@ -686,6 +696,7 @@ minimapOverlay.addEventListener('click', () => {
 
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && isMinimapFullscreen) toggleMinimapFullscreen();
+  if (e.key === 'Escape' && isGuideOpen) closeGuide();
 });
 
 document.addEventListener('click', (e) => {
@@ -828,6 +839,33 @@ window.addEventListener('mousemove', (e) => {
   photoPanel.style.width = `${pct}%`;
 });
 window.addEventListener('mouseup', () => { isDraggingDivider = false; });
+
+// ============================================================
+// Navigation Guide
+// ============================================================
+
+let isGuideOpen = false;
+let hasShownGuide = false;
+
+function openGuide() {
+  isGuideOpen = true;
+  guideModal.classList.add('visible');
+  guideOverlay.classList.add('visible');
+}
+
+function closeGuide() {
+  isGuideOpen = false;
+  guideModal.classList.remove('visible');
+  guideOverlay.classList.remove('visible');
+}
+
+function toggleGuide() {
+  isGuideOpen ? closeGuide() : openGuide();
+}
+
+guideToggle.addEventListener('click', toggleGuide);
+guideClose.addEventListener('click', closeGuide);
+guideOverlay.addEventListener('click', closeGuide);
 
 // ============================================================
 // PlayCanvas init
