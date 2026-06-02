@@ -62,6 +62,8 @@ function initDb() {
   addColIfNotExists('room_info', 'train_time',  'TEXT');
   addColIfNotExists('room_info', 'image_count', 'INTEGER');
   addColIfNotExists('room_info', 'splat_type',  'TEXT');
+  addColIfNotExists('room_info', 'psnr',        'REAL');
+  addColIfNotExists('room_info', 'ssim',        'REAL');
 
   addColIfNotExists('scenes', 'cam_yaw',   'REAL');
   addColIfNotExists('scenes', 'cam_pitch', 'REAL');

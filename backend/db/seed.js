@@ -204,6 +204,7 @@ const roomInfos = [
     train_time: '64 jam 50 menit',
     image_count: 2800,
     splat_type: 'Splat3',
+    psnr: 10.90, ssim: 0.3134,
   },
   {
     scene_id: 'kelas-if112',
@@ -215,6 +216,7 @@ const roomInfos = [
     train_time: '1 jam 16 menit',
     image_count: 700,
     splat_type: 'Splat MCMC',
+    psnr: 12.28, ssim: 0.7075,
   },
   {
     scene_id: 'plaza-supenno',
@@ -226,6 +228,7 @@ const roomInfos = [
     train_time: '53 menit 14 detik',
     image_count: 800,
     splat_type: 'Splat MCMC',
+    psnr: 13.26, ssim: 0.6036,
   },
   {
     scene_id: 'aula',
@@ -237,6 +240,7 @@ const roomInfos = [
     train_time: '1 Jam 26 Menit',
     image_count: '1000',
     splat_type: 'Splat MCMC',
+    psnr: 13.61, ssim: 0.5230,
   },
   {
     scene_id: 'kelas-if107',
@@ -248,6 +252,7 @@ const roomInfos = [
     train_time: '1 Jam 47 Menit',
     image_count: '889',
     splat_type: 'Splat MCMC',
+    psnr: 10.08, ssim: 0.5214,
   },
   {
     scene_id: 'lab-kcv',
@@ -259,6 +264,7 @@ const roomInfos = [
     train_time: '1 Jam 54 Menit',
     image_count: '800',
     splat_type: 'Splat3',
+    psnr: 9.68, ssim: 0.5514,
   },
   {
     scene_id: 'ruang-rapat',
@@ -270,6 +276,7 @@ const roomInfos = [
     train_time: '26 Menit 20 Detik',
     image_count: '500',
     splat_type: 'Splat MCMC',
+    psnr: 10.80, ssim: 0.6521,
   },
   {
     scene_id: 'ruang-sidang',
@@ -281,6 +288,7 @@ const roomInfos = [
     train_time: '58 Menit 51 Detik',
     image_count: '800',
     splat_type: 'Splat MCMC',
+    psnr: 11.18, ssim: 0.5543,
   },
   {
     scene_id: 'lounge',
@@ -292,6 +300,7 @@ const roomInfos = [
     train_time: '1 Jam 50 Menit',
     image_count: '1000',
     splat_type: 'Splat MCMC',
+    psnr: 12.82, ssim: 0.6024,
   },
   {
     scene_id: 'ruang-dosen-if227',
@@ -303,6 +312,7 @@ const roomInfos = [
     train_time: '34 Menit 9 Detik',
     image_count: '600',
     splat_type: 'Splat MCMC',
+    psnr: 10.98, ssim: 0.6057,
   },
   {
     scene_id: 'lab-pascasarjana',
@@ -314,6 +324,7 @@ const roomInfos = [
     train_time: '52 Menit 44 Detik',
     image_count: '1000',
     splat_type: 'Splat MCMC',
+    psnr: 11.48, ssim: 0.5936,
   },
   {
     scene_id: 'loby-pascasarjana',
@@ -325,6 +336,7 @@ const roomInfos = [
     train_time: '1 Jam 10 Menit',
     image_count: '600',
     splat_type: 'Splat MCMC',
+    psnr: 12.33, ssim: 0.6421,
   },
   {
     scene_id: 'kelas-if105',
@@ -336,6 +348,7 @@ const roomInfos = [
     train_time: '54 Menit 18 Detik',
     image_count: '800',
     splat_type: 'Splat MCMC',
+    psnr: 12.05, ssim: 0.5292,
   },
 ];
 
@@ -398,10 +411,10 @@ const runSeed = db.transaction(() => {
   const insertRoomInfo = db.prepare(`
     INSERT INTO room_info
       (scene_id, floor_number, room_type, capacity, description,
-       splat_count, train_time, image_count, splat_type)
+       splat_count, train_time, image_count, splat_type, psnr, ssim)
     VALUES
       (@scene_id, @floor_number, @room_type, @capacity, @description,
-       @splat_count, @train_time, @image_count, @splat_type)
+       @splat_count, @train_time, @image_count, @splat_type, @psnr, @ssim)
   `);
   for (const r of roomInfos) insertRoomInfo.run(r);
 
