@@ -28,7 +28,8 @@ const stmtGetHotspots = db.prepare(`
 
 const stmtGetRoomInfo = db.prepare(`
   SELECT floor_number, room_type, capacity, description,
-         splat_count, train_time, image_count, splat_type
+         splat_count, train_time, image_count, splat_type,
+         psnr, ssim
   FROM room_info
   WHERE scene_id = ?
 `);

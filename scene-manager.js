@@ -132,6 +132,8 @@ const infoSplatType = document.getElementById('info-splat-type');
 const infoSplatCount = document.getElementById('info-splat-count');
 const infoImageCount = document.getElementById('info-image-count');
 const infoTrainTime = document.getElementById('info-train-time');
+const infoPsnr = document.getElementById('info-psnr');
+const infoSsim = document.getElementById('info-ssim');
 const photoPanel = document.getElementById('photo-panel');
 const comparisonPhoto = document.getElementById('comparison-photo');
 const photoCounter = document.getElementById('photo-counter');
@@ -716,6 +718,8 @@ function updateReconstructionPanel(roomInfo) {
     : '—';
   infoImageCount.textContent = roomInfo?.image_count ?? '—';
   infoTrainTime.textContent = roomInfo?.train_time ?? '—';
+  infoPsnr.textContent = roomInfo?.psnr != null ? `${roomInfo.psnr.toFixed(2)} dB` : '—';
+  infoSsim.textContent = roomInfo?.ssim != null ? roomInfo.ssim.toFixed(4) : '—';
 }
 
 function openInfoPanel() {
