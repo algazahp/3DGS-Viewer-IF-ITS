@@ -24,8 +24,7 @@ if (process.env.NODE_ENV === 'production') {
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// FRONTEND_ORIGIN: tambahkan lebih dari satu dengan koma, contoh:
-// FRONTEND_ORIGIN=http://127.0.0.1:5500,https://username.github.io
+// tambah origin via FRONTEND_ORIGIN di .env, pisah koma
 const extraOrigins = (process.env.FRONTEND_ORIGIN || '')
   .split(',')
   .map(s => s.trim())
@@ -57,13 +56,11 @@ app.get('/health', (req, res) => {
 
 app.use('/api/scenes', scenesRouter);
 
-// TEMPORARY: serve file .sog dari storage lokal untuk testing
-// Hapus atau nonaktifkan setelah setup Cloudflare R2
+// serve .sog lokal — aktif kalau LOCAL_SPLAT_DIR di-set di .env
 if (process.env.LOCAL_SPLAT_DIR) {
   const splatDir = path.resolve(process.env.LOCAL_SPLAT_DIR);
   app.use('/local-splats', express.static(splatDir, {
     setHeaders(res) {
-      // Izinkan browser baca file dari origin yang berbeda (frontend dev server)
       res.set('Access-Control-Allow-Origin', '*');
       res.set('Accept-Ranges', 'bytes');
     },

@@ -14,12 +14,7 @@ try {
 
 const db = require('../database');
 
-// ============================================================
-// Parse CLI flags
-//   node db/seed.js           → placeholder [R2_URL]
-//   node db/seed.js --local   → http://localhost:3000/local-splats
-//   node db/seed.js --r2 https://pub-xxx.r2.dev  → URL R2 yang sebenarnya
-// ============================================================
+// parse flag: --local (local server) atau --r2 <url> (R2)
 const args = process.argv.slice(2);
 const isLocal = args.includes('--local');
 const r2Idx = args.indexOf('--r2');
@@ -44,9 +39,6 @@ if (isLocal) {
   mode = 'placeholder → ganti [R2_URL] dengan URL R2 sebenarnya';
 }
 
-// ============================================================
-// Data scenes — file_url dibangun dari baseUrl + nama file
-// ============================================================
 const scenes = [
   {
     id: 'exterior',
@@ -382,16 +374,13 @@ const photoRefs = [
   { scene_id: 'kelas-if105', photo_url: 'assets/photos/kelas-if105/foto2.jpg', display_order: 2 },
 ];
 
-// Hotspot dikalibrasi manual setelah viewer berjalan.
-// Contoh entry: { scene_id: 'exterior', label: 'Ruang Kelas IF-112', target_scene_id: 'kelas-if112', screen_x: 0.45, screen_y: 0.60 }
+// dikalibrasi manual setelah viewer jalan
 const hotspots = [
   { scene_id: 'exterior', label: 'Ruang Kelas IF-112', target_scene_id: 'kelas-if112', screen_x: 0.5088, screen_y: 0.5545 },
   { scene_id: 'exterior', label: 'Plaza Supenno', target_scene_id: 'plaza-supenno', screen_x: 0.5264, screen_y: 0.5926 },
 ];
 
-// ============================================================
-// Insert — idempoten (hapus data lama sebelum insert)
-// ============================================================
+// hapus semua dulu baru insert ulang
 const runSeed = db.transaction(() => {
   db.prepare('DELETE FROM photo_refs').run();
   db.prepare('DELETE FROM hotspots').run();
