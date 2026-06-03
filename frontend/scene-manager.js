@@ -1,9 +1,6 @@
 import * as pc from 'https://cdn.jsdelivr.net/npm/playcanvas/build/playcanvas.mjs';
 window.__pc = pc;
 
-// ============================================================
-// Konstanta
-// ============================================================
 const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:3001'
   : 'https://3dgs-viewer-if-its-production.up.railway.app';
@@ -55,7 +52,7 @@ function computeAffineTransform(pts) {
 
 const AFFINE = computeAffineTransform(MINIMAP_POINTS);
 
-// Posisi titik marker statis per scene interior (fraksi 0–1 dari lebar/tinggi gambar denah)
+// posisi marker statis per scene interior (fraksi 0–1 dari ukuran gambar denah)
 const SCENE_MARKER_POS = {
   'plaza-supenno': { x: 0.50, y: 0.71 },
   'kelas-if112': { x: 0.12, y: 0.40 },
@@ -71,9 +68,7 @@ const SCENE_MARKER_POS = {
   'lab-kcv': { x: 0.82, y: 0.49 },
 };
 
-// ============================================================
-// State global
-// ============================================================
+// state
 let app;
 let cameraEntity;
 let currentAsset = null;
@@ -84,26 +79,22 @@ let isTransitioning = false;
 let lastMinimapUpdate = 0;
 let infoPanelActive = false;
 
-// Mode kamera aktif — ditentukan per-scene berdasarkan room_type
-// 'free'  : eksterior → WASD + pointer lock mouse look
-// 'orbit' : kelas / plaza → drag rotate + scroll zoom
+// 'free': WASD + pointer lock | 'orbit': drag + scroll zoom
 let cameraMode = 'orbit';
 
-// ── Orbit camera state ──────────────────────────────────────
+// orbit state
 let orbitRadius = 5;
-let orbitTheta = 0;   // yaw, radian, bebas 360°
-let orbitPhi = 0;   // pitch, radian, diklem ±86°
+let orbitTheta = 0;
+let orbitPhi = 0;
 const orbitTarget = new pc.Vec3(0, 0, 0);
 
-// ── Free camera state ────────────────────────────────────────
-let yaw = 0;     // rotasi horizontal, radian
-let pitch = 0;     // rotasi vertikal, radian
-let moveSpeed = 5;     // unit/detik; scroll mengubah nilai ini
-const keys = {};    // key codes yang sedang ditekan
+// free camera state
+let yaw = 0;
+let pitch = 0;
+let moveSpeed = 5;  // unit/detik, diubah via scroll
+const keys = {};
 
-// ============================================================
-// DOM references
-// ============================================================
+// DOM refs
 const canvas = document.getElementById('splat-canvas');
 const loadingScreen = document.getElementById('loading-screen');
 const loadingText = document.getElementById('loading-text');
@@ -146,10 +137,6 @@ const guideModal = document.getElementById('guide-modal');
 const guideOverlay = document.getElementById('guide-overlay');
 const guideClose = document.getElementById('guide-close');
 
-// ============================================================
-// Loading screen helpers
-// ============================================================
-
 function showLoading(text = 'Memuat...') {
   if (document.pointerLockElement) document.exitPointerLock();
   clearTimeout(inactivityTimer);
@@ -177,10 +164,7 @@ function delay(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
 
-// ============================================================
-// Camera hint — muncul saat 3 detik tidak ada aksi, hilang saat ada aksi
-// ============================================================
-
+// camera hint — muncul 500ms setelah idle
 let inactivityTimer = null;
 
 function hideCameraHint() {
@@ -201,10 +185,6 @@ function resetInactivityTimer() {
   clearTimeout(inactivityTimer);
   inactivityTimer = setTimeout(() => showCameraHint(cameraMode), 500);
 }
-
-// ============================================================
-// Fetch file .sog dengan progress tracking via ReadableStream
-// ============================================================
 
 async function fetchWithProgress(url, onProgress) {
   const response = await fetch(url);
@@ -244,10 +224,6 @@ async function fetchWithRetry(url, onProgress, maxRetry = 2) {
   throw lastError;
 }
 
-// ============================================================
-// Unload scene aktif (cegah memory leak)
-// ============================================================
-
 function unloadCurrentScene() {
   if (currentSplatEntity) { currentSplatEntity.destroy(); currentSplatEntity = null; }
   if (currentAsset) { app.assets.remove(currentAsset); currentAsset.unload(); currentAsset = null; }
@@ -255,31 +231,23 @@ function unloadCurrentScene() {
   if (window.gc) window.gc();
 }
 
-// ============================================================
-// Load scene — fetch metadata → download .sog → render
-// ============================================================
-
 async function loadScene(sceneId) {
   closeComparison();
   closeInfoPanel();
   closeGuide();
   if (isMinimapFullscreen) toggleMinimapFullscreen();
 
-  // 1. Metadata dari backend
   const resp = await fetch(`${BACKEND_URL}/api/scenes/${sceneId}`);
   if (!resp.ok) throw new Error(`Scene tidak ditemukan: ${sceneId}`);
   const sceneData = await resp.json();
 
-  // 2. Update loading text + download
   loadingText.textContent = `Memuat ${sceneData.label}...`;
   updateProgress(0);
   const blobUrl = await fetchWithRetry(sceneData.file_url, updateProgress);
 
-  // 3. Bersihkan scene lama
   unloadCurrentScene();
   updateProgress(0.92);
 
-  // 4. Asset PlayCanvas
   const asset = new pc.Asset(sceneId, 'gsplat', {
     url: blobUrl,
     filename: `${sceneId}.sog`,
@@ -292,19 +260,17 @@ async function loadScene(sceneId) {
     app.assets.load(asset);
   });
 
-  // 5. Entity + rotasi fix (coordinate system .sog terbalik vs training)
+  // rotasi wajib — coordinate system .sog terbalik vs training
   const entity = new pc.Entity('splat');
   entity.addComponent('gsplat', { asset });
   app.root.addChild(entity);
   entity.setEulerAngles(180, 180, 0);
 
-  // 6. Simpan state
   currentAsset = asset;
   currentSplatEntity = entity;
   currentBlobUrl = blobUrl;
   currentSceneData = sceneData;
 
-  // 7. Set mode kamera — free untuk scene tertentu, orbit untuk sisanya
   const FREE_CAMERA_SCENES = [
     'exterior',
     'plaza-supenno',
@@ -325,37 +291,32 @@ async function loadScene(sceneId) {
     initOrbitFromCamPos(sceneData.cam_pos);
   }
 
-  // 8. Update UI + mulai inactivity timer (hint muncul setelah 3 detik idle)
   updateUI(sceneData);
   resetInactivityTimer();
 
-  // Update gambar minimap sesuai floor_map scene
   if (sceneData.floor_map) {
     minimapImg.src = sceneData.floor_map;
   }
 
-  // Set posisi indikator
   const markerPos = SCENE_MARKER_POS[sceneData.id];
   if (markerPos) {
-    // Interior: titik statis di posisi ruangan pada denah
+    // interior: titik statis di posisi ruangan pada denah
     minimapIndicator.style.display = 'block';
     minimapIndicator.style.left = `${markerPos.x * 100}%`;
     minimapIndicator.style.top = `${markerPos.y * 100}%`;
     minimapIndicator.style.transition = 'none';
   } else if (sceneData.id === 'exterior') {
-    // Eksterior: indikator dinamis via updateMinimapIndicator() — restore transition
+    // eksterior: indikator dinamis, restore transition
     minimapIndicator.style.display = 'block';
     minimapIndicator.style.transition = 'left 0.3s ease, top 0.3s ease';
   }
 
-  // Tandai interior/eksterior untuk styling
   if (sceneData.id === 'exterior') {
     minimapEl.classList.remove('is-interior');
   } else {
     minimapEl.classList.add('is-interior');
   }
 
-  // Update label header minimap
   const FLOOR_LABEL = {
     'exterior': 'Peta Lokasi',
     'plaza-supenno': 'Lantai 1',
@@ -376,7 +337,6 @@ async function loadScene(sceneId) {
     headerSpan.textContent = FLOOR_LABEL[sceneData.id] ?? 'Peta Lokasi';
   }
 
-  // Tombol fullscreen hanya untuk scene interior
   if (sceneData.id === 'exterior') {
     minimapFullscreen.style.display = 'none';
   } else {
@@ -391,10 +351,6 @@ async function loadScene(sceneId) {
     setTimeout(() => openGuide(), 800);
   }
 }
-
-// ============================================================
-// Update UI
-// ============================================================
 
 const ROOM_TYPE_LABEL = { eksterior: 'Eksterior', kelas: 'Ruang Kelas', plaza: 'Plaza' };
 
@@ -417,10 +373,6 @@ function updateUI(sceneData) {
 
   updateReconstructionPanel(sceneData.room_info);
 }
-
-// ============================================================
-// Transisi antar scene (fade to black)
-// ============================================================
 
 async function transitionTo(sceneId) {
   if (isTransitioning) return;
@@ -447,10 +399,6 @@ async function transitionTo(sceneId) {
   isTransitioning = false;
 }
 
-// ============================================================
-// Orbit camera
-// ============================================================
-
 function initOrbitFromCamPos(camPos) {
   const { x, y, z } = camPos;
   orbitRadius = Math.sqrt(x * x + y * y + z * z) || 5;
@@ -470,10 +418,6 @@ function updateCameraFromOrbit() {
   cameraEntity.lookAt(orbitTarget);
 }
 
-// ============================================================
-// Free camera — inisialisasi posisi dan reset yaw/pitch
-// ============================================================
-
 function initCameraFromPos(camPos, camYaw, camPitch) {
   cameraEntity.setPosition(camPos.x, camPos.y, camPos.z);
   yaw = camYaw ?? Math.PI;
@@ -485,17 +429,11 @@ function initCameraFromPos(camPos, camYaw, camPitch) {
   );
 }
 
-// ============================================================
-// Controls — mouse, wheel, keyboard, touch
-// Satu set listener per event, branching cameraMode di runtime.
-// ============================================================
-
+// controls — branching cameraMode di runtime
 function initMouseControls() {
-  // ── Orbit drag state ─────────────────────────────────────
   let isDragging = false;
   let lastX = 0, lastY = 0;
 
-  // ── Mouse down ───────────────────────────────────────────
   canvas.addEventListener('mousedown', (e) => {
     resetInactivityTimer();
     if (e.button !== 0) return;
@@ -508,7 +446,6 @@ function initMouseControls() {
     }
   });
 
-  // ── Mouse move ───────────────────────────────────────────
   window.addEventListener('mousemove', (e) => {
     resetInactivityTimer();
     if (cameraMode === 'free') {
@@ -533,7 +470,6 @@ function initMouseControls() {
   window.addEventListener('mouseup', () => { isDragging = false; });
   window.addEventListener('mouseleave', () => { isDragging = false; });
 
-  // ── Wheel ────────────────────────────────────────────────
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
     resetInactivityTimer();
@@ -549,7 +485,6 @@ function initMouseControls() {
 
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
-  // ── Keyboard (WASD untuk free camera) ───────────────────
   window.addEventListener('keydown', (e) => {
     resetInactivityTimer();
     keys[e.code] = true;
@@ -559,7 +494,6 @@ function initMouseControls() {
   });
   window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
-  // ── Touch ────────────────────────────────────────────────
   let lastTouchX = 0, lastTouchY = 0, lastTouchDist = 0;
 
   canvas.addEventListener('touchstart', (e) => {
@@ -575,7 +509,7 @@ function initMouseControls() {
           e.touches[0].clientY - e.touches[1].clientY,
         );
       } else {
-        // free: 2 jari — track center Y untuk swipe maju/mundur
+        // free: 2 jari — track center Y untuk maju/mundur
         lastTouchY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
       }
     }
@@ -586,7 +520,7 @@ function initMouseControls() {
     resetInactivityTimer();
     if (cameraMode === 'free') {
       if (e.touches.length === 1) {
-        // 1 jari: look (yaw/pitch)
+        // look
         const dx = e.touches[0].clientX - lastTouchX;
         const dy = e.touches[0].clientY - lastTouchY;
         lastTouchX = e.touches[0].clientX;
@@ -595,7 +529,7 @@ function initMouseControls() {
         pitch -= dy * 0.005;
         pitch = Math.max(-Math.PI * 0.49, Math.min(Math.PI * 0.49, pitch));
       } else if (e.touches.length === 2) {
-        // 2 jari swipe vertikal: gerak maju/mundur
+        // swipe vertikal: maju/mundur
         const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
         const dy = lastTouchY - centerY; // positif = swipe ke atas = maju
         lastTouchY = centerY;
@@ -605,7 +539,6 @@ function initMouseControls() {
         cameraEntity.setPosition(pos.x + forward.x * step, pos.y, pos.z + forward.z * step);
       }
     } else {
-      // orbit mode
       if (e.touches.length === 1) {
         const dx = e.touches[0].clientX - lastTouchX;
         const dy = e.touches[0].clientY - lastTouchY;
@@ -631,13 +564,9 @@ function initMouseControls() {
   canvas.addEventListener('touchend', (e) => { e.preventDefault(); }, { passive: false });
 }
 
-// ============================================================
-// Minimap
-// ============================================================
-
 function updateMinimapIndicator() {
   if (!cameraEntity) return;
-  // Interior scenes: posisi titik sudah di-set statis di loadScene()
+  // interior: posisi statis, di-set di loadScene()
   if (currentSceneData?.id !== 'exterior') return;
 
   const pos = cameraEntity.getPosition();
@@ -646,10 +575,6 @@ function updateMinimapIndicator() {
   minimapIndicator.style.left = `${Math.max(0, Math.min(1, mu)) * 100}%`;
   minimapIndicator.style.top = `${Math.max(0, Math.min(1, mv)) * 100}%`;
 }
-
-// ============================================================
-// Scene list sidebar
-// ============================================================
 
 async function initSceneList() {
   try {
@@ -707,10 +632,6 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ============================================================
-// Reconstruction Info Panel
-// ============================================================
-
 function updateReconstructionPanel(roomInfo) {
   infoSplatType.textContent = roomInfo?.splat_type ?? '—';
   infoSplatCount.textContent = roomInfo?.splat_count
@@ -742,16 +663,10 @@ infoToggle.addEventListener('click', () => {
 
 infoClose.addEventListener('click', closeInfoPanel);
 
-// ============================================================
-// PHOTO COMPARISON — implementasi bersih
-// ============================================================
-
-// State
 let comparisonActive = false;
 let currentPhotos = [];
 let currentPhotoIdx = 0;
 
-// Fetch foto dari API dan preload gambar pertama
 async function loadComparisonPhotos(sceneId) {
   try {
     const resp = await fetch(`${BACKEND_URL}/api/scenes/${sceneId}/photos`);
@@ -761,7 +676,7 @@ async function loadComparisonPhotos(sceneId) {
 
     if (currentPhotos.length === 0) return;
 
-    // Preload gambar pertama sebelum tampilkan
+    // preload gambar pertama sebelum ditampilkan
     await new Promise((resolve) => {
       const img = new Image();
       img.onload = resolve;
@@ -778,14 +693,12 @@ async function loadComparisonPhotos(sceneId) {
   }
 }
 
-// Update tampilan foto aktif
 function updateComparisonPhoto() {
   if (!currentPhotos.length) return;
   comparisonPhoto.src = currentPhotos[currentPhotoIdx];
   photoCounter.textContent = `${currentPhotoIdx + 1} / ${currentPhotos.length}`;
 }
 
-// Buka comparison panel
 async function openComparison() {
   comparisonActive = true;
   photoComparison.classList.add('is-active');
@@ -796,7 +709,6 @@ async function openComparison() {
   }
 }
 
-// Tutup comparison panel
 function closeComparison() {
   comparisonActive = false;
   photoComparison.classList.remove('is-active');
@@ -806,7 +718,6 @@ function closeComparison() {
   currentPhotoIdx = 0;
 }
 
-// Toggle
 comparisonToggle.addEventListener('click', () => {
   if (comparisonActive) {
     closeComparison();
@@ -815,10 +726,8 @@ comparisonToggle.addEventListener('click', () => {
   }
 });
 
-// Tombol X tutup panel
 photoClose.addEventListener('click', closeComparison);
 
-// Navigasi foto
 photoPrev.addEventListener('click', () => {
   if (!currentPhotos.length) return;
   currentPhotoIdx = (currentPhotoIdx - 1 + currentPhotos.length) % currentPhotos.length;
@@ -831,7 +740,6 @@ photoNext.addEventListener('click', () => {
   updateComparisonPhoto();
 });
 
-// Drag divider
 let isDraggingDivider = false;
 divider.addEventListener('mousedown', (e) => {
   isDraggingDivider = true;
@@ -843,10 +751,6 @@ window.addEventListener('mousemove', (e) => {
   photoPanel.style.width = `${pct}%`;
 });
 window.addEventListener('mouseup', () => { isDraggingDivider = false; });
-
-// ============================================================
-// Navigation Guide
-// ============================================================
 
 let isGuideOpen = false;
 let hasShownGuide = false;
@@ -870,10 +774,6 @@ function toggleGuide() {
 guideToggle.addEventListener('click', toggleGuide);
 guideClose.addEventListener('click', closeGuide);
 guideOverlay.addEventListener('click', closeGuide);
-
-// ============================================================
-// PlayCanvas init
-// ============================================================
 
 async function initPlayCanvas() {
   const gfxOptions = {
@@ -969,10 +869,7 @@ async function initPlayCanvas() {
 }
 
 
-// ============================================================
-// Console helpers — kalibrasi cam_pos di browser DevTools
-// ============================================================
-
+// console helpers — buka DevTools lalu ketik getCamera() / setHome()
 window.getCamera = function () {
   const pos = cameraEntity.getPosition();
   console.log('cam_pos:', { x: +pos.x.toFixed(3), y: +pos.y.toFixed(3), z: +pos.z.toFixed(3) });
@@ -1000,10 +897,6 @@ window.calibrateMinimap = function () {
   console.log(`world:   x=${pos.x.toFixed(3)}, z=${pos.z.toFixed(3)}`);
   console.log(`minimap: left=${(mu * 100).toFixed(1)}%, top=${(mv * 100).toFixed(1)}%`);
 };
-
-// ============================================================
-// Entry point
-// ============================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
   await initPlayCanvas();
