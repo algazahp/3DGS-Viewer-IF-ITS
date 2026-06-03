@@ -72,7 +72,7 @@ const scenes = [
   },
   {
     id: 'plaza-supenno',
-    label: 'Plaza Supenno',
+    label: 'Plasa Prof. Supeno',
     file_url: `${baseUrl}/PlazaSupenoClear.sog`,
     back_to: 'exterior',
     cam_pos_x: 1.804, cam_pos_y: -0.220, cam_pos_z: 0.303,
