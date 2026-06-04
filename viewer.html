@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Web Viewer 3DGS — Gedung Teknik Informatika ITS</title>
+  <link rel="icon" href="assets/LogoInformatika.gif">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <!-- WebGL/WebGPU render target — PlayCanvas menggambar langsung ke sini -->
@@ -43,13 +46,34 @@
           <div class="guide-section-title">Kamera Bebas (Free Camera)</div>
           <div class="guide-section-note">Berlaku untuk scene eksterior dan sebagian besar scene interior</div>
           <table class="guide-table">
-            <tr><td class="guide-key">Klik layar</td><td>Mulai navigasi, kursor terkunci</td></tr>
-            <tr><td class="guide-key">W / A / S / D</td><td>Maju / kiri / mundur / kanan</td></tr>
-            <tr><td class="guide-key">Mouse</td><td>Arahkan pandangan kamera</td></tr>
-            <tr><td class="guide-key">Scroll ↑</td><td>Tambah kecepatan gerak</td></tr>
-            <tr><td class="guide-key">Scroll ↓</td><td>Kurangi kecepatan gerak</td></tr>
-            <tr><td class="guide-key">Shift</td><td>Sprint untuk gerak lebih cepat</td></tr>
-            <tr><td class="guide-key">ESC</td><td>Tampilkan kursor, berhenti navigasi</td></tr>
+            <tr>
+              <td class="guide-key">Klik layar</td>
+              <td>Mulai navigasi, kursor terkunci</td>
+            </tr>
+            <tr>
+              <td class="guide-key">W / A / S / D</td>
+              <td>Maju / kiri / mundur / kanan</td>
+            </tr>
+            <tr>
+              <td class="guide-key">Mouse</td>
+              <td>Arahkan pandangan kamera</td>
+            </tr>
+            <tr>
+              <td class="guide-key">Scroll ↑</td>
+              <td>Tambah kecepatan gerak</td>
+            </tr>
+            <tr>
+              <td class="guide-key">Scroll ↓</td>
+              <td>Kurangi kecepatan gerak</td>
+            </tr>
+            <tr>
+              <td class="guide-key">Shift</td>
+              <td>Sprint untuk gerak lebih cepat</td>
+            </tr>
+            <tr>
+              <td class="guide-key">ESC</td>
+              <td>Tampilkan kursor, berhenti navigasi</td>
+            </tr>
           </table>
         </div>
 
@@ -57,17 +81,32 @@
           <div class="guide-section-title">Kamera Orbit (Orbit Camera)</div>
           <div class="guide-section-note">Berlaku untuk Ruang Rapat, Ruang Dosen IF-227, Ruang Kelas IF-112</div>
           <table class="guide-table">
-            <tr><td class="guide-key">Drag mouse</td><td>Putar kamera mengelilingi objek</td></tr>
-            <tr><td class="guide-key">Scroll ↑ / ↓</td><td>Zoom in / zoom out</td></tr>
+            <tr>
+              <td class="guide-key">Drag mouse</td>
+              <td>Putar kamera mengelilingi objek</td>
+            </tr>
+            <tr>
+              <td class="guide-key">Scroll ↑ / ↓</td>
+              <td>Zoom in / zoom out</td>
+            </tr>
           </table>
         </div>
 
         <div class="guide-section">
           <div class="guide-section-title">Ganti Scene</div>
           <table class="guide-table">
-            <tr><td class="guide-key">Tombol Scene</td><td>Buka daftar semua scene</td></tr>
-            <tr><td class="guide-key">Klik scene</td><td>Pindah ke scene yang dipilih</td></tr>
-            <tr><td class="guide-key">Tombol Kembali</td><td>Kembali ke halaman utama</td></tr>
+            <tr>
+              <td class="guide-key">Tombol Scene</td>
+              <td>Buka daftar semua scene</td>
+            </tr>
+            <tr>
+              <td class="guide-key">Klik scene</td>
+              <td>Pindah ke scene yang dipilih</td>
+            </tr>
+            <tr>
+              <td class="guide-key">Tombol Kembali</td>
+              <td>Kembali ke halaman utama</td>
+            </tr>
           </table>
         </div>
 
@@ -85,8 +124,8 @@
       </div>
       <div id="minimap-body">
         <div id="minimap-img-wrapper">
-          <img id="minimap-img" src="assets/minimapinformatika.png"
-               alt="Peta Gedung IF ITS" draggable="false" loading="lazy"/>
+          <img id="minimap-img" src="assets/minimapinformatika.png" alt="Peta Gedung IF ITS" draggable="false"
+            loading="lazy" />
           <div id="minimap-indicator"></div>
         </div>
       </div>
@@ -97,13 +136,11 @@
 
     <!-- Info Rekonstruksi toggle button + panel, pojok kanan atas sebelah kiri Scene -->
     <button id="info-toggle" title="Info Rekonstruksi">
-      <svg width="14" height="14" viewBox="0 0 24 24"
-           fill="none" stroke="currentColor"
-           stroke-width="2" stroke-linecap="round"
-           stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="12" y1="8" x2="12" y2="8"/>
-        <line x1="12" y1="12" x2="12" y2="16"/>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="8" />
+        <line x1="12" y1="12" x2="12" y2="16" />
       </svg>
       Info
     </button>
@@ -162,7 +199,7 @@
       <div id="photo-panel">
         <div class="comparison-label">Foto Asli</div>
         <button id="photo-close">&#10005;</button>
-        <img id="comparison-photo" src="" alt="Foto referensi"/>
+        <img id="comparison-photo" src="" alt="Foto referensi" />
         <div id="photo-nav">
           <button id="photo-prev">&#8592;</button>
           <span id="photo-counter">1 / 1</span>
@@ -177,12 +214,10 @@
 
     <!-- Toggle button Photo Comparison — di bawah back button, pojok kiri atas -->
     <button id="comparison-toggle" hidden title="Bandingkan foto asli vs 3DGS">
-      <svg width="14" height="14" viewBox="0 0 24 24"
-           fill="none" stroke="currentColor"
-           stroke-width="2" stroke-linecap="round"
-           stroke-linejoin="round">
-        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-        <circle cx="12" cy="13" r="4"/>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+        <circle cx="12" cy="13" r="4" />
       </svg>
       Foto vs 3DGS
     </button>
@@ -196,14 +231,17 @@
   -->
   <div id="loading-screen" class="is-visible">
     <div class="spinner"></div>
-    <p id="loading-text">Menginisialisasi viewer...</p>
+    <div id="loading-main-text">Memuat scene...</div>
     <div id="progress-bar-container">
       <div id="progress-bar"></div>
     </div>
     <p id="loading-percent">0%</p>
+    <div id="loading-sub-text"></div>
+    <p id="loading-text" style="display:none"></p>
     <button id="retry-btn" hidden>Coba Lagi</button>
   </div>
 
   <script type="module" src="scene-manager.js"></script>
 </body>
+
 </html>
