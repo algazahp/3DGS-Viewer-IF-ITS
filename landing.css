@@ -269,10 +269,9 @@ body {
 .scene-card-desc {
   padding: 0 14px 12px;
   font-family: var(--font-body);
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.5);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
   line-height: 1.4;
-  margin: 0;
 }
 
 /* ── Footer ─────────────────────────────────────────────────────── */
