@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Virtual Tour — Gedung Teknik Informatika ITS</title>
+  <link rel="icon" href="assets/LogoInformatika.gif">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="landing.css">
 </head>
+
 <body>
 
   <!-- ── Hero ──────────────────────────────────────────────────── -->
@@ -20,12 +23,10 @@
       <p class="hero-sub">Virtual Tour</p>
       <a href="viewer.html" class="btn-primary">
         Mulai Jelajahi
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.5"
-             stroke-linecap="round" stroke-linejoin="round"
-             aria-hidden="true">
-          <line x1="5" y1="12" x2="19" y2="12"/>
-          <polyline points="12 5 19 12 12 19"/>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
         </svg>
       </a>
     </div>
@@ -33,20 +34,18 @@
 
   <!-- ── Tentang Departemen ────────────────────────────────────── -->
   <section class="about">
-    <img
-      src="assets/LogoInformatika.gif"
-      alt="Logo Departemen Teknik Informatika ITS"
-      class="about-logo"
-    />
+    <img src="assets/IFLogo.png" alt="Logo Departemen Teknik Informatika ITS" class="about-logo" />
     <h2 class="about-title">Departemen Teknik Informatika</h2>
     <p class="about-institution">Institut Teknologi Sepuluh Nopember</p>
     <p class="about-desc">
-      Departemen Teknik Informatika ITS adalah salah satu departemen unggulan di
-      bidang ilmu komputer dan rekayasa perangkat lunak di Indonesia, dengan rekam
-      jejak riset yang mencakup kecerdasan buatan, visi komputer, dan sistem terdistribusi.
-      Proyek ini merekonstruksi secara digital tiga belas lokasi di Gedung Teknik
-      Informatika ITS menggunakan teknologi 3D Gaussian Splatting — hasil penelitian
-      Tugas Akhir yang dapat diakses langsung dari peramban tanpa instalasi tambahan.
+      Gedung Teknik Informatika Institut Teknologi Sepuluh Nopember (ITS) Surabaya merupakan pusat kegiatan akademik dan
+      penelitian Departemen Teknik Informatika, salah satu departemen terkemuka di bidang ilmu komputer di Indonesia.
+      Gedung ini menampung berbagai fasilitas, mulai dari ruang kelas dan laboratorium penelitian hingga ruang dosen,
+      aula, dan area sosial mahasiswa yang tersebar di tiga lantai.
+      Melalui aplikasi virtual tour ini, Anda dapat menjelajahi tiga belas lokasi di dalam dan sekitar gedung secara
+      interaktif langsung dari peramban, tanpa memerlukan instalasi perangkat lunak tambahan. Rekonstruksi tiga dimensi
+      dilakukan menggunakan teknologi 3D Gaussian Splatting yang menghasilkan representasi visual berkualitas tinggi
+      dari setiap ruangan.
     </p>
   </section>
 
@@ -80,144 +79,95 @@
     <div class="scenes-grid">
 
       <a href="viewer.html?scene=exterior" class="scene-card">
-        <img
-          src="assets/photos/exterior/foto1.jpg"
-          alt="Gedung IF ITS"
-          class="scene-card-img"
-          loading="lazy"
-        />
+        <img src="assets/photos/exterior/foto1.jpg" alt="Gedung IF ITS" class="scene-card-img" loading="lazy" />
         <div class="scene-card-label">Gedung IF ITS</div>
         <p class="scene-card-desc">Gedung utama Departemen Teknik Informatika ITS, terdiri dari 3 lantai</p>
       </a>
 
       <a href="viewer.html?scene=plaza-supenno" class="scene-card">
-        <img
-          src="assets/photos/plaza-supenno/foto1.jpg"
-          alt="Plasa Prof. Supeno"
-          class="scene-card-img"
-          loading="lazy"
-        />
+        <img src="assets/photos/plaza-supenno/foto1.jpg" alt="Plasa Prof. Supeno" class="scene-card-img"
+          loading="lazy" />
         <div class="scene-card-label">Plasa Prof. Supeno</div>
-        <p class="scene-card-desc">Area terbuka untuk kegiatan akademik dan sosial mahasiswa</p>
+        <p class="scene-card-desc">Area terbuka untuk kegiatan akademik dan sosial mahasiswa. </p>
       </a>
 
       <a href="viewer.html?scene=aula" class="scene-card">
-        <img
-          src="assets/photos/aula/foto1.jpg"
-          alt="Aula"
-          class="scene-card-img"
-          loading="lazy"
-        />
+        <img src="assets/photos/aula/foto1.jpg" alt="Aula" class="scene-card-img" loading="lazy" />
         <div class="scene-card-label">Aula</div>
-        <p class="scene-card-desc">Ruang pertemuan berkapasitas besar untuk seminar dan acara departemen</p>
+        <p class="scene-card-desc">Ruang pertemuan berkapasitas besar untuk seminar dan acara departemen. Ruang AULA
+          dinamakan menjadi Ruang AULA- Prof. Handayani Tjandrasa sebagai penghargaan kepada Prof. Handayani Tjandrasa
+          yang memasuki masa purnatugas</p>
       </a>
 
       <a href="viewer.html?scene=ruang-rapat" class="scene-card">
-        <img
-          src="assets/photos/ruang-rapat/foto1.jpg"
-          alt="Ruang Rapat"
-          class="scene-card-img"
-          loading="lazy"
-        />
+        <img src="assets/photos/ruang-rapat/foto1.jpg" alt="Ruang Rapat" class="scene-card-img" loading="lazy" />
         <div class="scene-card-label">Ruang Rapat</div>
         <p class="scene-card-desc">Ruang rapat resmi untuk kegiatan dosen dan pimpinan departemen</p>
       </a>
 
       <a href="viewer.html?scene=ruang-sidang" class="scene-card">
-        <img
-          src="assets/photos/ruang-sidang/foto1.jpg"
-          alt="Ruang Sidang"
-          class="scene-card-img"
-          loading="lazy"
-        />
+        <img src="assets/photos/ruang-sidang/foto1.jpg" alt="Ruang Sidang" class="scene-card-img" loading="lazy" />
         <div class="scene-card-label">Ruang Sidang</div>
-        <p class="scene-card-desc">Ruang sidang untuk ujian tugas akhir dan kegiatan formal akademik</p>
+        <p class="scene-card-desc">Departemen Teknik Informatika memiliki Ruang Sidang yang representatif dan berstandar
+          internasional, yang dapat menampung 40 orang
+
+        </p>
       </a>
 
       <a href="viewer.html?scene=lounge" class="scene-card">
-        <img
-          src="assets/photos/lounge/foto1.jpg"
-          alt="Lounge"
-          class="scene-card-img"
-          loading="lazy"
-        />
+        <img src="assets/photos/lounge/foto1.jpg" alt="Lounge" class="scene-card-img" loading="lazy" />
         <div class="scene-card-label">Lounge</div>
-        <p class="scene-card-desc">Ruang santai mahasiswa dilengkapi fasilitas pendukung kegiatan belajar</p>
+        <p class="scene-card-desc">Lounge untuk kegiatan dosen dan tamu</p>
       </a>
 
       <a href="viewer.html?scene=ruang-dosen-if227" class="scene-card">
-        <img
-          src="assets/photos/ruang-dosen-if227/foto1.jpg"
-          alt="Ruang Dosen IF-227"
-          class="scene-card-img"
-          loading="lazy"
-        />
+        <img src="assets/photos/ruang-dosen-if227/foto1.jpg" alt="Ruang Dosen IF-227" class="scene-card-img"
+          loading="lazy" />
         <div class="scene-card-label">Ruang Dosen IF-227</div>
         <p class="scene-card-desc">Ruang kerja dosen Departemen Teknik Informatika</p>
       </a>
 
       <a href="viewer.html?scene=lab-kcv" class="scene-card">
-        <img
-          src="assets/photos/lab-kcv/foto1.jpg"
-          alt="Lab KCV"
-          class="scene-card-img"
-          loading="lazy"
-        />
+        <img src="assets/photos/lab-kcv/foto1.jpg" alt="Lab KCV" class="scene-card-img" loading="lazy" />
         <div class="scene-card-label">Lab KCV</div>
-        <p class="scene-card-desc">Laboratorium Komputasi Cerdas dan Visualisasi untuk penelitian AI</p>
+        <p class="scene-card-desc">Laboratorium Komputasi Cerdas dan Visi. Di Laboratorium ini ditawarkan bidang
+          keahlian yang ditekankan pada kemampuan lulusan dalam memanipulasi dan menganalisis data citra pada berbagai
+          bidang aplikasi (a.l. biomedika, industri), kemampuan menerapkan metode sistem cerdas pada berbagai bidang
+          aplikasi dan kemampuan memodelkan dan mengoptimasikan sistem nyata.</p>
       </a>
 
       <a href="viewer.html?scene=lab-pascasarjana" class="scene-card">
-        <img
-          src="assets/photos/lab-pascasarjana/foto1.jpg"
-          alt="Lab Pascasarjana"
-          class="scene-card-img"
-          loading="lazy"
-        />
+        <img src="assets/photos/lab-pascasarjana/foto1.jpg" alt="Lab Pascasarjana" class="scene-card-img"
+          loading="lazy" />
         <div class="scene-card-label">Lab Pascasarjana</div>
-        <p class="scene-card-desc">Laboratorium riset untuk mahasiswa program pascasarjana</p>
+        <p class="scene-card-desc">Laboratorium ini merupakan fasilitas mahasiswa program master untuk menyelesaikan
+          tugas-tugas kuliah dan tesis seperti studi literatur, ujicoba aplikasi/data, dan penulisan tesis. Selain
+          laboratorium ini mahasiswa program master dapat juga menggunakan laboratorium bidang minat sesuai dengan
+          bidang penelitian masing-masing.</p>
       </a>
 
       <a href="viewer.html?scene=loby-pascasarjana" class="scene-card">
-        <img
-          src="assets/photos/loby-pascasarjana/foto1.jpg"
-          alt="Loby Pascasarjana"
-          class="scene-card-img"
-          loading="lazy"
-        />
+        <img src="assets/photos/loby-pascasarjana/foto1.jpg" alt="Loby Pascasarjana" class="scene-card-img"
+          loading="lazy" />
         <div class="scene-card-label">Loby Pascasarjana</div>
         <p class="scene-card-desc">Area lobi gedung pascasarjana Teknik Informatika</p>
       </a>
 
       <a href="viewer.html?scene=kelas-if112" class="scene-card">
-        <img
-          src="assets/photos/kelas-if112/foto1.jpg"
-          alt="Ruang Kelas IF-112"
-          class="scene-card-img"
-          loading="lazy"
-        />
+        <img src="assets/photos/kelas-if112/foto1.jpg" alt="Ruang Kelas IF-112" class="scene-card-img" loading="lazy" />
         <div class="scene-card-label">Ruang Kelas IF-112</div>
-        <p class="scene-card-desc">Ruang kelas perkuliahan berkapasitas sedang</p>
+        <p class="scene-card-desc">Ruang kelas perkuliahan berkapasitas 40 orang</p>
       </a>
 
       <a href="viewer.html?scene=kelas-if105" class="scene-card">
-        <img
-          src="assets/photos/kelas-if105/foto1.jpg"
-          alt="Kelas IF-105"
-          class="scene-card-img"
-          loading="lazy"
-        />
+        <img src="assets/photos/kelas-if105/foto1.jpg" alt="Kelas IF-105" class="scene-card-img" loading="lazy" />
         <div class="scene-card-label">Kelas IF-105</div>
-        <p class="scene-card-desc">Ruang kelas perkuliahan reguler Departemen Teknik Informatika</p>
+        <p class="scene-card-desc">Ruang kelas perkuliahan berkapasitas besar dapat menampung hingga 100 orang</p>
       </a>
 
       <a href="viewer.html?scene=kelas-if107" class="scene-card">
-        <img
-          src="assets/photos/kelas-if107/foto1.jpg"
-          alt="Smart Classroom IF-107"
-          class="scene-card-img"
-          loading="lazy"
-        />
+        <img src="assets/photos/kelas-if107/foto1.jpg" alt="Smart Classroom IF-107" class="scene-card-img"
+          loading="lazy" />
         <div class="scene-card-label">Smart Classroom IF-107</div>
         <p class="scene-card-desc">Smart Classroom dengan fasilitas pembelajaran modern</p>
       </a>
@@ -228,11 +178,7 @@
   <!-- ── Footer ────────────────────────────────────────────────── -->
   <footer class="footer">
     <div class="footer-inner">
-      <img
-        src="assets/LogoInformatika.gif"
-        alt="Logo Departemen Teknik Informatika ITS"
-        class="footer-logo"
-      />
+      <img src="assets/LogoInformatika.gif" alt="Logo Departemen Teknik Informatika ITS" class="footer-logo" />
       <p class="footer-name">Al Dhihya Gaza Halim Putra</p>
       <p class="footer-institution">Institut Teknologi Sepuluh Nopember</p>
       <p class="footer-year">2026</p>
@@ -241,4 +187,5 @@
   </footer>
 
 </body>
+
 </html>
