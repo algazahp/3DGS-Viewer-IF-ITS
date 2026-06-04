@@ -1,4 +1,4 @@
-import * as pc from 'https://cdn.jsdelivr.net/npm/playcanvas/build/playcanvas.mjs';
+import * as pc from 'https://cdn.jsdelivr.net/npm/playcanvas@2.19.0/build/playcanvas.mjs';
 window.__pc = pc;
 
 const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
