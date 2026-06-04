@@ -5,6 +5,8 @@ const BACKEND_URL = (window.location.hostname === 'localhost' || window.location
   ? 'http://localhost:3001'
   : 'https://3dgs-viewer-if-its-production.up.railway.app';
 
+const startScene = new URLSearchParams(window.location.search).get('scene') || 'exterior';
+
 // 6 titik kalibrasi: world coords (wx, wz) → minimap UV (mu, mv)
 // mu=0 kiri, mu=1 kanan, mv=0 atas, mv=1 bawah
 const MINIMAP_POINTS = [
@@ -359,9 +361,9 @@ function updateUI(sceneData) {
   const roomType = sceneData.room_info?.room_type ?? '';
   sceneTypeEl.textContent = ROOM_TYPE_LABEL[roomType] ?? roomType;
 
-  if (sceneData.back_to) {
+  if (sceneData.id !== 'exterior') {
     backBtn.hidden = false;
-    backBtn.onclick = () => transitionTo(sceneData.back_to);
+    backBtn.onclick = () => { window.location.href = 'index.html'; };
   } else {
     backBtn.hidden = true;
     backBtn.onclick = null;
@@ -903,7 +905,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSceneList();
 
   try {
-    await loadScene('exterior');
+    await loadScene(startScene);
   } catch (err) {
     console.error('[3DGS] Gagal load scene awal:', err);
     loadingText.textContent = 'Gagal memuat scene. Pastikan backend berjalan dan URL R2 sudah dikonfigurasi.';
