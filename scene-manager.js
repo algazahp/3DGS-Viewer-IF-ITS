@@ -245,38 +245,22 @@ async function loadScene(sceneId) {
 
   loadingText.textContent = `Memuat ${sceneData.label}...`;
   updateProgress(0);
+  const blobUrl = await fetchWithRetry(sceneData.file_url, updateProgress);
 
-  const isStreamedLod = sceneData.file_url.endsWith('lod-meta.json');
+  unloadCurrentScene();
+  updateProgress(0.92);
 
-  let asset;
-  let blobUrl = null;
+  const asset = new pc.Asset(sceneId, 'gsplat', {
+    url: blobUrl,
+    filename: `${sceneId}.sog`,
+  });
+  app.assets.add(asset);
 
-  if (isStreamedLod) {
-    // Streamed LOD — PlayCanvas asset system load langsung dari URL manifest
-    unloadCurrentScene();
-    asset = new pc.Asset(sceneId, 'gsplat', { url: sceneData.file_url });
-    app.assets.add(asset);
-    await new Promise((resolve, reject) => {
-      asset.on('error', (msg) => reject(new Error(`Asset error: ${msg}`)));
-      asset.ready(() => { updateProgress(1); resolve(); });
-      app.assets.load(asset);
-    });
-  } else {
-    // SOG biasa — fetch manual sebagai blob lalu load
-    blobUrl = await fetchWithRetry(sceneData.file_url, updateProgress);
-    unloadCurrentScene();
-    updateProgress(0.92);
-    asset = new pc.Asset(sceneId, 'gsplat', {
-      url: blobUrl,
-      filename: `${sceneId}.sog`,
-    });
-    app.assets.add(asset);
-    await new Promise((resolve, reject) => {
-      asset.on('error', (msg) => reject(new Error(`Asset error: ${msg}`)));
-      asset.ready(() => { updateProgress(1); resolve(); });
-      app.assets.load(asset);
-    });
-  }
+  await new Promise((resolve, reject) => {
+    asset.on('error', (msg) => reject(new Error(`Asset error: ${msg}`)));
+    asset.ready(() => { updateProgress(1); resolve(); });
+    app.assets.load(asset);
+  });
 
   // rotasi wajib — coordinate system .sog terbalik vs training
   const entity = new pc.Entity('splat');
