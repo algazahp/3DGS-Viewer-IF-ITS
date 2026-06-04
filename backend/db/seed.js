@@ -43,7 +43,7 @@ const scenes = [
   {
     id: 'exterior',
     label: 'Gedung Teknik Informatika ITS',
-    file_url: `${baseUrl}/exterior-streamed/lod-meta.json`,
+    file_url: `${baseUrl}/GedungTCv4Clear.sog`,
     back_to: null,
     cam_pos_x: -0.074, cam_pos_y: -1.213, cam_pos_z: -3.167,
     cam_rot_x: 0, cam_rot_y: 0, cam_rot_z: 0,
