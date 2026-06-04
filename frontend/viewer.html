@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Viewer 3DGS — Gedung Teknik Informatika ITS</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- WebGL/WebGPU render target — PlayCanvas menggambar langsung ke sini -->
+  <canvas id="splat-canvas"></canvas>
+
+  <!--
+    #overlay: wrapper semua UI di atas canvas.
+    pointer-events: none di level ini, diaktifkan per-elemen yang perlu klik.
+  -->
+  <div id="overlay">
+
+    <!-- FPS counter tengah atas -->
+    <div id="fps-counter">-- FPS</div>
+
+    <!-- Info panel pojok kiri bawah: nama scene + badge tipe ruangan -->
+    <div id="info-panel">
+      <span id="scene-label">Memuat...</span>
+      <span id="scene-type"></span>
+    </div>
+
+    <!-- Overlay gelap saat minimap fullscreen -->
+    <div id="minimap-overlay"></div>
+
+    <!-- Overlay + modal panduan navigasi -->
+    <div id="guide-overlay"></div>
+
+    <div id="guide-modal">
+      <div id="guide-header">
+        <span>Panduan Navigasi</span>
+        <button id="guide-close">✕</button>
+      </div>
+      <div id="guide-body">
+
+        <div class="guide-section">
+          <div class="guide-section-title">Kamera Bebas (Free Camera)</div>
+          <div class="guide-section-note">Berlaku untuk scene eksterior dan sebagian besar scene interior</div>
+          <table class="guide-table">
+            <tr><td class="guide-key">Klik layar</td><td>Mulai navigasi, kursor terkunci</td></tr>
+            <tr><td class="guide-key">W / A / S / D</td><td>Maju / kiri / mundur / kanan</td></tr>
+            <tr><td class="guide-key">Mouse</td><td>Arahkan pandangan kamera</td></tr>
+            <tr><td class="guide-key">Scroll ↑</td><td>Tambah kecepatan gerak</td></tr>
+            <tr><td class="guide-key">Scroll ↓</td><td>Kurangi kecepatan gerak</td></tr>
+            <tr><td class="guide-key">Shift</td><td>Sprint untuk gerak lebih cepat</td></tr>
+            <tr><td class="guide-key">ESC</td><td>Tampilkan kursor, berhenti navigasi</td></tr>
+          </table>
+        </div>
+
+        <div class="guide-section">
+          <div class="guide-section-title">Kamera Orbit (Orbit Camera)</div>
+          <div class="guide-section-note">Berlaku untuk Ruang Rapat, Ruang Dosen IF-227, Ruang Kelas IF-112</div>
+          <table class="guide-table">
+            <tr><td class="guide-key">Drag mouse</td><td>Putar kamera mengelilingi objek</td></tr>
+            <tr><td class="guide-key">Scroll ↑ / ↓</td><td>Zoom in / zoom out</td></tr>
+          </table>
+        </div>
+
+        <div class="guide-section">
+          <div class="guide-section-title">Ganti Scene</div>
+          <table class="guide-table">
+            <tr><td class="guide-key">Tombol Scene</td><td>Buka daftar semua scene</td></tr>
+            <tr><td class="guide-key">Klik scene</td><td>Pindah ke scene yang dipilih</td></tr>
+            <tr><td class="guide-key">Tombol Kembali</td><td>Kembali ke halaman utama</td></tr>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Minimap pojok kanan bawah — hanya tampil di scene eksterior -->
+    <div id="minimap">
+      <div id="minimap-header">
+        <span>Peta Lokasi</span>
+        <div style="display:flex;gap:4px">
+          <button id="minimap-fullscreen" title="Perbesar peta">⛶</button>
+          <button id="minimap-toggle" title="Sembunyikan peta">−</button>
+        </div>
+      </div>
+      <div id="minimap-body">
+        <div id="minimap-img-wrapper">
+          <img id="minimap-img" src="assets/minimapinformatika.png"
+               alt="Peta Gedung IF ITS" draggable="false" loading="lazy"/>
+          <div id="minimap-indicator"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tombol Panduan navigasi, sebelah kiri tombol Info -->
+    <button id="guide-toggle" title="Panduan navigasi">Help ?</button>
+
+    <!-- Info Rekonstruksi toggle button + panel, pojok kanan atas sebelah kiri Scene -->
+    <button id="info-toggle" title="Info Rekonstruksi">
+      <svg width="14" height="14" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round"
+           stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="8"/>
+        <line x1="12" y1="12" x2="12" y2="16"/>
+      </svg>
+      Info
+    </button>
+
+    <div id="reconstruction-panel" class="panel-hidden">
+      <div id="reconstruction-header">
+        <span>Info Rekonstruksi</span>
+        <button id="info-close">&#10005;</button>
+      </div>
+      <div id="reconstruction-body">
+        <div class="info-row">
+          <span class="info-key">Tipe Model</span>
+          <span class="info-val" id="info-splat-type">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Jumlah Splat</span>
+          <span class="info-val" id="info-splat-count">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Jumlah Citra</span>
+          <span class="info-val" id="info-image-count">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Waktu Training</span>
+          <span class="info-val" id="info-train-time">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">PSNR</span>
+          <span class="info-val" id="info-psnr">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">SSIM</span>
+          <span class="info-val" id="info-ssim">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Back button pojok kiri atas, hidden saat di scene eksterior -->
+    <button id="back-btn" hidden>
+      <span class="back-arrow">←</span> Kembali
+    </button>
+
+    <!-- Toggle button + panel daftar scene, pojok kanan atas -->
+    <button id="scene-list-toggle" title="Daftar Scene">&#9783; Scene</button>
+    <div id="scene-list" hidden>
+      <p class="scene-list-header">Pilih Scene</p>
+      <!-- diisi dinamis oleh initSceneList() -->
+    </div>
+
+    <!-- Hint kontrol kamera — muncul 3 detik saat scene baru dimuat, lalu fade out -->
+    <!-- Teks diisi JS: free="WASD..." | orbit="Drag..." -->
+    <div id="camera-hint"></div>
+
+    <!-- Photo Comparison Panel — split-screen foto asli vs render 3DGS -->
+    <div id="photo-comparison">
+      <div id="photo-panel">
+        <div class="comparison-label">Foto Asli</div>
+        <button id="photo-close">&#10005;</button>
+        <img id="comparison-photo" src="" alt="Foto referensi"/>
+        <div id="photo-nav">
+          <button id="photo-prev">&#8592;</button>
+          <span id="photo-counter">1 / 1</span>
+          <button id="photo-next">&#8594;</button>
+        </div>
+      </div>
+      <div id="comparison-divider">
+        <div id="divider-handle">&#8597;</div>
+      </div>
+      <div class="comparison-label" id="canvas-label">Render 3DGS</div>
+    </div>
+
+    <!-- Toggle button Photo Comparison — di bawah back button, pojok kiri atas -->
+    <button id="comparison-toggle" hidden title="Bandingkan foto asli vs 3DGS">
+      <svg width="14" height="14" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round"
+           stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+        <circle cx="12" cy="13" r="4"/>
+      </svg>
+      Foto vs 3DGS
+    </button>
+
+  </div>
+
+  <!--
+    #loading-screen: full-screen overlay hitam untuk loading awal dan transisi.
+    Starts visible (class is-visible) — dihapus setelah scene pertama selesai dimuat.
+    z-index lebih tinggi dari overlay agar menutupi canvas + UI saat transisi.
+  -->
+  <div id="loading-screen" class="is-visible">
+    <div class="spinner"></div>
+    <p id="loading-text">Menginisialisasi viewer...</p>
+    <div id="progress-bar-container">
+      <div id="progress-bar"></div>
+    </div>
+    <p id="loading-percent">0%</p>
+    <button id="retry-btn" hidden>Coba Lagi</button>
+  </div>
+
+  <script type="module" src="scene-manager.js"></script>
+</body>
+</html>
