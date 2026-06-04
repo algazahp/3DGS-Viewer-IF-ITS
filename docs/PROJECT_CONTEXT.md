@@ -197,7 +197,7 @@ G:/TugasAkhir/Projects/3dgs-viewer/
 | Orbit camera | ✅ | Drag rotate + scroll zoom |
 | Camera mode per scene | ✅ | Berdasarkan `FREE_CAMERA_SCENES` array; 10 scene free, 3 scene orbit (kelas-if112, ruang-dosen-if227, ruang-rapat) |
 | Kalibrasi cam_yaw/cam_pitch | ✅ | Kolom di tabel scenes; `initCameraFromPos(pos, yaw, pitch)`; semua 13 scene sudah dikalibrasi |
-| Loading screen interaktif | ✅ | Pesan berganti tiap 2.5 detik; sub-keterangan muncul setelah 3 detik; pesan berbeda untuk exterior (18 juta splat) dan interior (3DGS) |
+| Loading screen interaktif | ✅ | Layout: spinner → pesan dinamis → progress bar → persentase → disclaimer. Pesan berganti tiap 2.5 detik; subDelay: exterior 3000ms, interior 0ms (langsung tampil). Data pesan di `loadingMessages` object dengan field `subDelay` per tipe scene. |
 | Fade transition | ✅ | Fade to black 380ms antar scene |
 | Scene list panel | ✅ | Toggle pojok kanan atas, highlight scene aktif |
 | Info panel | ✅ | Nama scene + badge room type, pojok kiri bawah |
@@ -218,10 +218,13 @@ G:/TugasAkhir/Projects/3dgs-viewer/
 ### Loading Screen Interaktif — Detail ✅
 | Sub-fitur | Status | Catatan |
 |-----------|--------|---------|
+| Layout urutan | ✅ | spinner → `#loading-main-text` → progress bar → `#loading-percent` → `#loading-sub-text`. `#loading-text` tetap ada (hidden) untuk referensi JS error/retry. |
 | Pesan berganti | ✅ | `setInterval` 2.5 detik, fade opacity 0.4s |
-| Sub-keterangan | ✅ | Muncul setelah 3 detik via `setTimeout`, fade-in CSS |
-| Pesan exterior | ✅ | 5 pesan: menyebut 18.000.000 splat, WebGPU, estimasi loading |
-| Pesan interior | ✅ | 4 pesan: keterangan singkat 3DGS |
+| Sub-keterangan exterior | ✅ | Muncul setelah 3 detik (`subDelay: 3000`). Isi: "18 juta splat dan berukuran 262 MB. Estimasi 1–3 menit." |
+| Sub-keterangan interior | ✅ | Langsung tampil saat loading dimulai (`subDelay: 0`). Isi: keterangan singkat 3DGS. |
+| Pesan exterior | ✅ | 5 pesan: "Memuat model eksterior gedung...", "Memproses 18 juta Gaussian splat...", "Rendering berbasis WebGPU sedang disiapkan...", "Mengoptimalkan kualitas visual...", "Hampir selesai..." |
+| Pesan interior | ✅ | 4 pesan: "Memuat model ruangan...", "Memproses data rekonstruksi 3D...", "Menyiapkan tampilan interaktif...", "Hampir selesai..." |
+| Alignment disclaimer | ✅ | `text-align: center !important; margin: 0 auto !important; width: 100%; display: block; padding: 0 24px` + style inline di HTML |
 | Cleanup | ✅ | `stopLoadingMessages()` dipanggil di `hideLoading()` — clear interval + timeout |
 | Fungsi | ✅ | `startLoadingMessages(sceneId)`, `stopLoadingMessages()` di `scene-manager.js` |
 
