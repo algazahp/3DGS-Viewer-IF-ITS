@@ -80,7 +80,7 @@ const loadingMessages = {
       'Mengoptimalkan kualitas visual...',
       'Hampir selesai...',
     ],
-    sub: 'Model eksterior mengandung 18 juta splat dan berukuran 262 MB. Proses pemuatan memerlukan waktu 1 hingga 3 menit tergantung kecepatan internet dan kemampuan perangkat Anda.',
+    sub: 'Model eksterior mengandung 18.000.000 Splat. Proses pemuatan memerlukan waktu tergantung kecepatan internet dan kemampuan perangkat Anda.',
     subDelay: 3000,
   },
   interior: {

@@ -1,6 +1,6 @@
 # Next Steps — Web Viewer 3DGS
 
-> Status per 2026-06-02.
+> Status per 2026-06-05.
 
 ---
 
@@ -26,6 +26,7 @@ Warna hijau ≥50 FPS, kuning ≥30, merah <30.
 `pc.createGraphicsDevice` dengan `deviceTypes: ['webgpu', 'webgl2']`.
 Fallback otomatis ke WebGL2 jika browser tidak support.
 Confirmed: deviceType = 'webgpu' aktif di Chrome.
+PlayCanvas 2.19.0, `unified: true`, confirmed stabil.
 
 ### [x] e. Tambah Scene Baru
 13 scene tersedia di DB, semua sudah dikalibrasi cam_pos, cam_yaw, dan cam_pitch:
@@ -159,18 +160,35 @@ SSIM tertinggi: kelas-if112 (0.7075). SSIM terendah: kelas-if107 (0.5214).
 Scene exterior di-skip — background langit hitam akibat pruning tidak representatif.
 Hasil lengkap di PROJECT_CONTEXT.md bagian 11.
 
+### [x] z. Landing Page Live ✅
+`index.html` + `landing.css` — hero section, about, statistik, grid 13 scene dengan foto.
+Viewer dipindah ke `viewer.html`. Tombol "Mulai Jelajahi" mengarah ke `viewer.html`.
+Setiap kartu scene dilengkapi foto thumbnail + deskripsi singkat.
+
+### [x] aa. Deskripsi Scene di Kartu Landing Page ✅
+13 kartu scene masing-masing memiliki `<p class="scene-card-desc">` di bawah nama scene.
+Deskripsi bervariasi per scene — natural, tanpa em dash.
+Styling: font-size 0.75rem, color var(--ink-muted), line-height 1.4.
+
+### [x] ab. Loading Screen Interaktif ✅
+Pesan berganti setiap 2.5 detik dengan fade opacity 0.4s.
+Sub-keterangan muncul setelah 3 detik loading.
+Pesan berbeda per tipe scene:
+- Exterior (5 pesan): menyebut 18.000.000 Gaussian splat, WebGPU, estimasi loading
+- Interior (4 pesan): keterangan singkat 3DGS
+Fungsi: `startLoadingMessages(sceneId)`, `stopLoadingMessages()` di `scene-manager.js`.
+Elemen HTML: `#loading-messages`, `#loading-main-text`, `#loading-sub-text` di `viewer.html`.
+
+### [x] ac. Fix Tombol Kembali di Scene Exterior ✅
+Sebelumnya `backBtn.hidden = true` saat scene exterior.
+Sekarang tombol selalu tampil di semua scene dan selalu mengarah ke `index.html`.
+Fix di `scene-manager.js:updateUI()`.
+
 ---
 
 ## YANG PERLU DILAKUKAN
 
 ### PRIORITAS SEKARANG
-
-**[ ] Evaluasi PSNR/SSIM scene exterior**
-Scene exterior di-skip karena background langit hitam akibat pruning.
-Opsi penyelesaian:
-1. Pakai model sebelum pruning (jika render tersedia)
-2. Crop area gedung saja, tanpa area langit
-Setelah render siap: `python tools/calc_metrics.py exterior <ref_folder> <render_folder>`
 
 **[ ] BUKU TA — prioritas utama, deadline sidang 22 Juni 2026**
 - Revisi Bab 1–3 (di Project Claude)
@@ -183,6 +201,20 @@ Setelah render siap: `python tools/calc_metrics.py exterior <ref_folder> <render
 - Tulis Bab 5 — Kesimpulan & Saran
   - Saran pengembangan: lihat bagian OPSIONAL di bawah
 
+**[ ] Evaluasi PSNR/SSIM scene exterior**
+Scene exterior di-skip karena background langit hitam akibat pruning.
+Opsi penyelesaian:
+1. Pakai model sebelum pruning (jika render tersedia)
+2. Crop area gedung saja, tanpa area langit
+Setelah render siap: `python tools/calc_metrics.py exterior <ref_folder> <render_folder>`
+
+**[ ] Setup UptimeRobot untuk Railway keep-alive**
+Railway Hobby plan sleep setelah ~30 menit tidak ada traffic.
+- Daftar di https://uptimerobot.com (free)
+- Monitor URL: `https://3dgs-viewer-if-its-production.up.railway.app/api/scenes`
+- Interval: setiap 5 menit
+- Tanpa ini, cold start menyebabkan request API pertama lambat ~5–10 detik.
+
 ---
 
 ### SETELAH BIMBINGAN DOSBING
@@ -190,10 +222,18 @@ Setelah render siap: `python tools/calc_metrics.py exterior <ref_folder> <render
 **[ ] Implementasi saran dari dosbing**
 Tunggu hasil bimbingan sebelum mengubah kode lebih lanjut.
 
-**[ ] Indikator sensitivitas kecepatan gerak kamera (saran teman)**
+**[ ] Fix navigasi WASD sejajar horizontal**
+Saat ini WASD bergerak mengikuti arah hadap kamera termasuk pitch.
+Perlu dikunci agar gerak horizontal selalu sejajar lantai.
+
+**[ ] Scroll wheel untuk maju/mundur**
+Saat ini scroll mengubah kecepatan (moveSpeed).
+Opsi: ganti atau tambah mode scroll untuk maju/mundur langsung.
+
+**[ ] Indikator sensitivitas kecepatan gerak kamera**
 Slider atau indikator visual yang menunjukkan kecepatan gerak kamera saat ini.
 
-**[ ] Vision cone / arah hadap di minimap eksterior (saran teman)**
+**[ ] Vision cone / arah hadap di minimap eksterior**
 Tambah segitiga / cone di atas titik indikator minimap yang menunjukkan arah hadap kamera.
 
 **[ ] Tambah model ruangan baru jika diminta dosbing**
@@ -205,8 +245,12 @@ Jika ada scene tambahan yang diminta, ikuti alur: rekam → Postshot → convert
 ### OPSIONAL (saran pengembangan Bab 5)
 
 **[ ] Streamed LOD untuk eksterior (256 MB)**
+File sudah ada di R2: `exterior-streamed/`. Butuh perubahan loader ke `GSplatLod` component.
 Generate LOD rendah via splat-transform `--decimate`, load dulu ~20 MB lalu swap ke full res.
-Butuh perubahan loader ke `GSplatLod` component.
+
+**[ ] Walk mode**
+Mode berjalan di lantai — kamera dikunci di ketinggian tetap, tidak bisa terbang.
+Cocok untuk interior agar terasa seperti menjelajahi ruangan sungguhan.
 
 **[ ] Mobile responsiveness**
 Touch controls sudah ada, tapi layout UI belum dioptimalkan untuk layar kecil.
@@ -216,8 +260,8 @@ Scene eksterior (256 MB) kemungkinan tidak akan bisa jalan di mobile.
 Aktifkan Tiered Cache di Cloudflare untuk mengurangi request ke R2 origin.
 Berguna jika traffic meningkat signifikan.
 
-**[ ] Splat budget / unified rendering**
-PlayCanvas mendukung `maxSplats` di GSplatComponent dan mode unified rendering.
+**[ ] Splat budget / maxSplats**
+PlayCanvas mendukung `maxSplats` di GSplatComponent.
 Trade-off performa vs kualitas — diskusikan dengan dosbing sebelum diimplementasi.
 
 ---
@@ -230,4 +274,5 @@ Trade-off performa vs kualitas — diskusikan dengan dosbing sebelum diimplement
 - `BACKEND_URL` di `scene-manager.js` sudah dinamis — tidak perlu ganti manual ✅
 - Railway auto-redeploy setiap push ke `main` — DB re-seed otomatis saat cold start ✅
 - CDN `assets.ifsplat.my.id` aktif dengan cache 1 year — perubahan file .sog perlu cache purge manual ✅
-- **Deadline daftar sidang: 22 Juni 2026** — fokus ke buku TA dan PSNR/SSIM
+- **Deadline sidang: 22 Juni 2026** — fokus ke buku TA
+- **Loading lambat:** kemungkinan banyak tab browser — buka di Incognito atau tutup tab lain
