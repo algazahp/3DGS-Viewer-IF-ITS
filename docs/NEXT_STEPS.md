@@ -1,6 +1,6 @@
 # Next Steps — Web Viewer 3DGS
 
-> Status per 2026-06-05.
+> Status per 2026-06-05. Diupdate: 2026-06-05.
 
 ---
 
@@ -171,18 +171,29 @@ Deskripsi bervariasi per scene — natural, tanpa em dash.
 Styling: font-size 0.75rem, color var(--ink-muted), line-height 1.4.
 
 ### [x] ab. Loading Screen Interaktif ✅
+Layout final: spinner → `#loading-main-text` (pesan dinamis) → progress bar → `#loading-percent` → `#loading-sub-text` (disclaimer).
 Pesan berganti setiap 2.5 detik dengan fade opacity 0.4s.
-Sub-keterangan muncul setelah 3 detik loading.
-Pesan berbeda per tipe scene:
-- Exterior (5 pesan): menyebut 18.000.000 Gaussian splat, WebGPU, estimasi loading
-- Interior (4 pesan): keterangan singkat 3DGS
+Data pesan di `loadingMessages` object dengan field `subDelay` per tipe scene:
+- Exterior (5 pesan): menyebut 18 juta splat, 262 MB, estimasi 1–3 menit. Disclaimer muncul setelah 3 detik (`subDelay: 3000`).
+- Interior (4 pesan): keterangan singkat 3DGS. Disclaimer langsung tampil (`subDelay: 0`).
 Fungsi: `startLoadingMessages(sceneId)`, `stopLoadingMessages()` di `scene-manager.js`.
-Elemen HTML: `#loading-messages`, `#loading-main-text`, `#loading-sub-text` di `viewer.html`.
+Alignment disclaimer dipaksa rata tengah: `text-align: center !important` + style inline di `viewer.html`.
 
 ### [x] ac. Fix Tombol Kembali di Scene Exterior ✅
 Sebelumnya `backBtn.hidden = true` saat scene exterior.
 Sekarang tombol selalu tampil di semua scene dan selalu mengarah ke `index.html`.
 Fix di `scene-manager.js:updateUI()`.
+
+### [x] ad. Landing Page Live ✅
+`index.html` + `landing.css` — hero section, about, statistik, grid 13 scene dengan foto.
+Viewer dipindah ke `viewer.html`. Tombol "Mulai Jelajahi" mengarah ke `viewer.html`.
+
+### [x] ae. Deskripsi Scene di Kartu Landing Page ✅
+13 kartu scene masing-masing memiliki `<p class="scene-card-desc">` di bawah nama scene.
+Deskripsi bervariasi per scene — natural, tanpa em dash.
+
+### [x] af. Deskripsi About Section Landing Page ✅
+Paragraf about section sudah diperbarui dengan deskripsi lengkap gedung dan virtual tour.
 
 ---
 
@@ -190,7 +201,7 @@ Fix di `scene-manager.js:updateUI()`.
 
 ### PRIORITAS SEKARANG
 
-**[ ] BUKU TA — prioritas utama, deadline sidang 22 Juni 2026**
+**[ ] BUKU TA — prioritas utama**
 - Revisi Bab 1–3 (di Project Claude)
 - Tulis Bab 4 — Hasil & Analisis
   - Masukkan tabel PSNR/SSIM yang sudah ada (12 scene interior, rata-rata 11.71 dB / 0.5905)
@@ -200,13 +211,7 @@ Fix di `scene-manager.js:updateUI()`.
   - Tambahkan hasil exterior setelah evaluasi selesai
 - Tulis Bab 5 — Kesimpulan & Saran
   - Saran pengembangan: lihat bagian OPSIONAL di bawah
-
-**[ ] Evaluasi PSNR/SSIM scene exterior**
-Scene exterior di-skip karena background langit hitam akibat pruning.
-Opsi penyelesaian:
-1. Pakai model sebelum pruning (jika render tersedia)
-2. Crop area gedung saja, tanpa area langit
-Setelah render siap: `python tools/calc_metrics.py exterior <ref_folder> <render_folder>`
+- **Deadline: 22 Juni 2026**
 
 **[ ] Setup UptimeRobot untuk Railway keep-alive**
 Railway Hobby plan sleep setelah ~30 menit tidak ada traffic.
@@ -218,9 +223,6 @@ Railway Hobby plan sleep setelah ~30 menit tidak ada traffic.
 ---
 
 ### SETELAH BIMBINGAN DOSBING
-
-**[ ] Implementasi saran dari dosbing**
-Tunggu hasil bimbingan sebelum mengubah kode lebih lanjut.
 
 **[ ] Fix navigasi WASD sejajar horizontal**
 Saat ini WASD bergerak mengikuti arah hadap kamera termasuk pitch.
@@ -235,6 +237,10 @@ Slider atau indikator visual yang menunjukkan kecepatan gerak kamera saat ini.
 
 **[ ] Vision cone / arah hadap di minimap eksterior**
 Tambah segitiga / cone di atas titik indikator minimap yang menunjukkan arah hadap kamera.
+
+**[ ] Favicon menggunakan LogoInformatika.gif**
+`<link rel="icon" href="assets/LogoInformatika.gif">` sudah ada di HTML tapi belum diverifikasi tampil.
+Perlu test di browser dan pastikan file GIF berfungsi sebagai favicon.
 
 **[ ] Tambah model ruangan baru jika diminta dosbing**
 Jika ada scene tambahan yang diminta, ikuti alur: rekam → Postshot → convert ke .sog
