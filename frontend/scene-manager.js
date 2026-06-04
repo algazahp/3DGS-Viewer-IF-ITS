@@ -365,8 +365,8 @@ function updateUI(sceneData) {
     backBtn.hidden = false;
     backBtn.onclick = () => { window.location.href = 'index.html'; };
   } else {
-    backBtn.hidden = true;
-    backBtn.onclick = null;
+    backBtn.hidden = false;
+    backBtn.onclick = () => { window.location.href = 'index.html'; };
   }
 
   document.querySelectorAll('.scene-list-item').forEach((btn) => {
