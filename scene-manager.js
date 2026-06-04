@@ -75,12 +75,13 @@ const loadingMessages = {
   exterior: {
     main: [
       'Memuat model eksterior gedung...',
-      'Memproses 18.000.000 Gaussian splat...',
+      'Memproses 18 juta Gaussian splat...',
       'Rendering berbasis WebGPU sedang disiapkan...',
       'Mengoptimalkan kualitas visual...',
       'Hampir selesai...',
     ],
-    sub: 'Model eksterior mengandung 18.000.000 Splat. Proses pemuatan memerlukan waktu tergantung kecepatan internet dan kemampuan perangkat Anda.',
+    sub: 'Model eksterior mengandung 18 juta splat dan berukuran 262 MB. Proses pemuatan memerlukan waktu 1 hingga 3 menit tergantung kecepatan internet dan kemampuan perangkat Anda.',
+    subDelay: 3000,
   },
   interior: {
     main: [
@@ -90,6 +91,7 @@ const loadingMessages = {
       'Hampir selesai...',
     ],
     sub: 'Rekonstruksi dilakukan menggunakan metode 3D Gaussian Splatting.',
+    subDelay: 0,
   },
 };
 
@@ -99,6 +101,7 @@ let loadingSubTimeout = null;
 function startLoadingMessages(sceneId) {
   const mainEl = document.getElementById('loading-main-text');
   const subEl = document.getElementById('loading-sub-text');
+
   if (!mainEl || !subEl) return;
 
   const type = sceneId === 'exterior' ? 'exterior' : 'interior';
@@ -106,8 +109,8 @@ function startLoadingMessages(sceneId) {
 
   subEl.classList.remove('visible');
   subEl.textContent = messages.sub;
-  mainEl.style.opacity = '1';
   mainEl.textContent = messages.main[0];
+  mainEl.style.opacity = '1';
 
   let index = 0;
   loadingInterval = setInterval(() => {
@@ -119,9 +122,13 @@ function startLoadingMessages(sceneId) {
     }, 400);
   }, 2500);
 
-  loadingSubTimeout = setTimeout(() => {
+  if (messages.subDelay === 0) {
     subEl.classList.add('visible');
-  }, 3000);
+  } else {
+    loadingSubTimeout = setTimeout(() => {
+      subEl.classList.add('visible');
+    }, messages.subDelay);
+  }
 }
 
 function stopLoadingMessages() {
