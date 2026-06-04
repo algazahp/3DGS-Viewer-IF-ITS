@@ -264,7 +264,7 @@ async function loadScene(sceneId) {
 
   // rotasi wajib — coordinate system .sog terbalik vs training
   const entity = new pc.Entity('splat');
-  entity.addComponent('gsplat', { asset });
+  entity.addComponent('gsplat', { asset, unified: true });
   app.root.addChild(entity);
   entity.setEulerAngles(180, 180, 0);
 
