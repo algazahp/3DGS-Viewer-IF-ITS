@@ -70,6 +70,67 @@ const SCENE_MARKER_POS = {
   'lab-kcv': { x: 0.82, y: 0.49 },
 };
 
+// pesan loading interaktif per tipe scene
+const loadingMessages = {
+  exterior: {
+    main: [
+      'Memuat model eksterior gedung...',
+      'Memproses 18.000.000 Gaussian splat...',
+      'Rendering berbasis WebGPU sedang disiapkan...',
+      'Mengoptimalkan kualitas visual...',
+      'Hampir selesai...',
+    ],
+    sub: 'Model eksterior mengandung 18.000.000 Splat. Proses pemuatan memerlukan waktu tergantung kecepatan internet dan kemampuan perangkat Anda.',
+  },
+  interior: {
+    main: [
+      'Memuat model ruangan...',
+      'Memproses data rekonstruksi 3D...',
+      'Menyiapkan tampilan interaktif...',
+      'Hampir selesai...',
+    ],
+    sub: 'Rekonstruksi dilakukan menggunakan metode 3D Gaussian Splatting.',
+  },
+};
+
+let loadingInterval = null;
+let loadingSubTimeout = null;
+
+function startLoadingMessages(sceneId) {
+  const mainEl = document.getElementById('loading-main-text');
+  const subEl = document.getElementById('loading-sub-text');
+  if (!mainEl || !subEl) return;
+
+  const type = sceneId === 'exterior' ? 'exterior' : 'interior';
+  const messages = loadingMessages[type];
+
+  subEl.classList.remove('visible');
+  subEl.textContent = messages.sub;
+  mainEl.style.opacity = '1';
+  mainEl.textContent = messages.main[0];
+
+  let index = 0;
+  loadingInterval = setInterval(() => {
+    index = (index + 1) % messages.main.length;
+    mainEl.style.opacity = '0';
+    setTimeout(() => {
+      mainEl.textContent = messages.main[index];
+      mainEl.style.opacity = '1';
+    }, 400);
+  }, 2500);
+
+  loadingSubTimeout = setTimeout(() => {
+    subEl.classList.add('visible');
+  }, 3000);
+}
+
+function stopLoadingMessages() {
+  if (loadingInterval) { clearInterval(loadingInterval); loadingInterval = null; }
+  if (loadingSubTimeout) { clearTimeout(loadingSubTimeout); loadingSubTimeout = null; }
+  const subEl = document.getElementById('loading-sub-text');
+  if (subEl) subEl.classList.remove('visible');
+}
+
 // state
 let app;
 let cameraEntity;
@@ -151,6 +212,7 @@ function showLoading(text = 'Memuat...') {
 }
 
 async function hideLoading() {
+  stopLoadingMessages();
   loadingScreen.classList.remove('is-visible');
   comparisonToggle.hidden = false;
   await delay(380);
@@ -245,6 +307,7 @@ async function loadScene(sceneId) {
 
   loadingText.textContent = `Memuat ${sceneData.label}...`;
   updateProgress(0);
+  startLoadingMessages(sceneId);
   const blobUrl = await fetchWithRetry(sceneData.file_url, updateProgress);
 
   unloadCurrentScene();
