@@ -1,6 +1,6 @@
 # Project Context — Web Viewer 3DGS Gedung Teknik Informatika ITS
 
-> Dibuat: 2026-05-12. Diupdate: 2026-06-02.
+> Dibuat: 2026-05-12. Diupdate: 2026-06-05.
 
 ---
 
@@ -16,6 +16,8 @@
 | Storage file | Cloudflare R2 | Free 10 GB, zero egress fee. **LIVE** — semua 13 file .sog sudah diupload. CDN via `assets.ifsplat.my.id`. |
 | Deploy frontend | GitHub Pages + Custom Domain | **LIVE** — `https://ifsplat.my.id` (primary) dan `https://algazahp.github.io/3DGS-Viewer-IF-ITS/` (fallback). |
 | Deploy backend | Railway Hobby ($5/bulan) | **LIVE** — `https://3dgs-viewer-if-its-production.up.railway.app` |
+
+**PlayCanvas Engine:** 2.19.0 — `unified: true` (confirmed stabil di WebGPU). Loading lambat bukan dari engine, tapi dari banyak tab browser yang menghabiskan GPU memory. Solusi: buka di Incognito atau tutup tab lain.
 
 **File .sog lokal:** `G:/TugasAkhir/ScriptConvert/`
 - `GedungTCv4Clear.sog` — 256 MB
@@ -73,6 +75,7 @@
 - **First load lambat** (file besar dari R2), subsequent load cepat karena CDN + browser cache
 - **seed-production.js** hardcode CDN URL: `https://assets.ifsplat.my.id`
 - **Railway** auto-redeploy saat push ke `main`; DB di-seed ulang otomatis saat cold start production
+- **Railway cold start:** jika tidak ada traffic, Railway sleep setelah ~30 menit. UptimeRobot belum di-setup.
 
 ---
 
@@ -80,23 +83,28 @@
 
 ```
 G:/TugasAkhir/Projects/3dgs-viewer/
-├── index.html          ✅ copy dari frontend/ — diperlukan GitHub Pages dari root
+├── index.html          ✅ Landing page — grid 13 scene dengan foto + deskripsi
+├── viewer.html         ✅ copy dari frontend/ — halaman viewer utama
+├── landing.css         ✅ copy dari frontend/
 ├── style.css           ✅ copy dari frontend/
 ├── scene-manager.js    ✅ copy dari frontend/
 ├── assets/             ✅ copy dari frontend/assets/
 ├── lib/                ✅ copy dari frontend/lib/
 │
 ├── frontend/           ✅ source utama — tetap ada untuk development lokal
-│   ├── index.html          canvas, overlay, minimap (#minimap-img-wrapper),
-│   │                       loading screen, photo comparison,
-│   │                       reconstruction info panel, fps counter
-│   ├── style.css           dark theme, minimap (normal + fullscreen + interior),
-│   │                       retry btn, camera hint, photo comparison,
-│   │                       reconstruction panel, fps counter
+│   ├── index.html          landing page — hero, about, stats, grid 13 scene
+│   ├── viewer.html         canvas, overlay, minimap (#minimap-img-wrapper),
+│   │                       loading screen (dengan loading-messages interaktif),
+│   │                       photo comparison, reconstruction info panel, fps counter
+│   ├── landing.css         landing page styles — hero, about, stats, scene grid
+│   ├── style.css           viewer styles — dark theme, minimap, retry btn,
+│   │                       camera hint, photo comparison, reconstruction panel,
+│   │                       fps counter, loading-messages interaktif
 │   ├── scene-manager.js    PlayCanvas init (WebGPU+WebGL2), dual-mode camera,
 │   │                       minimap (eksterior affine + interior statis),
 │   │                       transitions, photo comparison,
 │   │                       reconstruction info panel, fps counter,
+│   │                       loading screen interaktif (startLoadingMessages),
 │   │                       cam_yaw/cam_pitch per scene, BACKEND_URL dinamis
 │   └── assets/
 │       ├── minimapinformatika.png   ✅ citra satelit gedung IF ITS (original)
@@ -104,6 +112,8 @@ G:/TugasAkhir/Projects/3dgs-viewer/
 │       ├── DenahLantai1.webp        ✅ denah lantai 1 (compressed WebP, 800px)
 │       ├── DenahLantai2.webp        ✅ denah lantai 2 (compressed WebP, 800px)
 │       ├── DenahLantai3.webp        ✅ denah lantai 3 (compressed WebP, 800px)
+│       ├── GedungTC.jpg             ✅ hero background landing page
+│       ├── IFLogo.png               ✅ logo departemen
 │       └── photos/                  ✅ foto referensi COLMAP per scene
 │           ├── exterior/             ✅ 3 foto
 │           ├── plaza-supenno/        ✅ 2 foto
@@ -142,7 +152,7 @@ G:/TugasAkhir/Projects/3dgs-viewer/
 │       │                      + cam_yaw, cam_pitch semua scene sudah dikalibrasi
 │       │                      + floor_map per scene (WebP denah lantai)
 │       ├── seed-production.js ✅ seed dengan CDN URL hardcoded (assets.ifsplat.my.id)
-│       └── init.js         ✅ auto-seed jika DB kosong (dipanggil server.js di production)
+│       └── init.js         ✅ auto-seed jika DB kosong; dipanggil saat cold start production
 │
 ├── .github/
 │   └── workflows/
@@ -179,17 +189,19 @@ G:/TugasAkhir/Projects/3dgs-viewer/
 ### Frontend — SELESAI ✅
 | Fitur | Status | Catatan |
 |-------|--------|---------|
-| PlayCanvas renderer | ✅ | GSplatComponent, ES module import dari CDN |
+| Landing page | ✅ | `index.html` + `landing.css` — hero, about, stats, grid 13 scene dengan foto + deskripsi |
+| Viewer page | ✅ | Dipindah ke `viewer.html`; tombol Kembali selalu tampil dan arahkan ke `index.html` |
+| PlayCanvas renderer | ✅ | GSplatComponent, ES module import dari CDN. Engine 2.19.0, `unified: true` |
 | WebGPU support | ✅ | `pc.createGraphicsDevice` dengan `deviceTypes: ['webgpu', 'webgl2']`; fallback otomatis ke WebGL2; confirmed webgpu di Chrome |
 | Free camera | ✅ | WASD + mouse look + pointer lock, Q/E naik turun, Shift sprint |
 | Orbit camera | ✅ | Drag rotate + scroll zoom |
 | Camera mode per scene | ✅ | Berdasarkan `FREE_CAMERA_SCENES` array; 10 scene free, 3 scene orbit (kelas-if112, ruang-dosen-if227, ruang-rapat) |
 | Kalibrasi cam_yaw/cam_pitch | ✅ | Kolom di tabel scenes; `initCameraFromPos(pos, yaw, pitch)`; semua 13 scene sudah dikalibrasi |
-| Loading screen | ✅ | Progress bar, spinner, % text, retry button |
+| Loading screen interaktif | ✅ | Pesan berganti tiap 2.5 detik; sub-keterangan muncul setelah 3 detik; pesan berbeda untuk exterior (18 juta splat) dan interior (3DGS) |
 | Fade transition | ✅ | Fade to black 380ms antar scene |
 | Scene list panel | ✅ | Toggle pojok kanan atas, highlight scene aktif |
 | Info panel | ✅ | Nama scene + badge room type, pojok kiri bawah |
-| Back button | ✅ | Muncul di scene interior, kembali ke eksterior |
+| Back button | ✅ | Tampil di SEMUA scene (termasuk exterior); selalu arahkan ke `index.html` |
 | Camera hint UI | ✅ | Muncul 500ms saat idle, hilang saat ada aksi |
 | Touch controls | ✅ | 1 jari = look/rotate, 2 jari = zoom/move |
 | Minimap | ✅ | Tampil untuk SEMUA scene (termasuk orbit camera); citra satelit untuk eksterior; gambar denah lantai untuk interior; indikator dinamis (affine) eksterior / statis (SCENE_MARKER_POS) interior; collapsible; fullscreen mode (khusus interior) |
@@ -202,6 +214,16 @@ G:/TugasAkhir/Projects/3dgs-viewer/
 | FPS Counter | ✅ | Tengah atas, update 500ms, warna hijau/kuning/merah |
 | Mutual close Info ↔ Scene List | ✅ | Buka satu panel otomatis tutup panel lain |
 | BACKEND_URL dinamis | ✅ | localhost:3001 (dev) vs Railway URL (production) |
+
+### Loading Screen Interaktif — Detail ✅
+| Sub-fitur | Status | Catatan |
+|-----------|--------|---------|
+| Pesan berganti | ✅ | `setInterval` 2.5 detik, fade opacity 0.4s |
+| Sub-keterangan | ✅ | Muncul setelah 3 detik via `setTimeout`, fade-in CSS |
+| Pesan exterior | ✅ | 5 pesan: menyebut 18.000.000 splat, WebGPU, estimasi loading |
+| Pesan interior | ✅ | 4 pesan: keterangan singkat 3DGS |
+| Cleanup | ✅ | `stopLoadingMessages()` dipanggil di `hideLoading()` — clear interval + timeout |
+| Fungsi | ✅ | `startLoadingMessages(sceneId)`, `stopLoadingMessages()` di `scene-manager.js` |
 
 ### Photo Comparison — Detail ✅
 | Sub-fitur | Status | Catatan |
@@ -306,10 +328,11 @@ R2 Public URL: `https://pub-ac5b32f0edac4a9fb2eaa996837e98be.r2.dev`
 | Scroll zoom terbalik | Scroll down tambah speed | Tanda minus pada `e.deltaY * 0.001` | `scene-manager.js:wheel handler` |
 | Port konflik | Project lain di port 3000 | Project ini pakai port 3001 | `backend/.env` |
 | Memory leak | Model lama tidak di-unload | `asset.unload() + revokeObjectURL()` | `scene-manager.js:unloadCurrentScene()` |
-| Out of Memory | Browser crash saat load ulang | Throttle minimap 100ms + lazy load img | `scene-manager.js`, `index.html` |
+| Out of Memory | Browser crash saat load ulang | Throttle minimap 100ms + lazy load img | `scene-manager.js`, `viewer.html` |
 | Photo comparison panel tidak bisa disembunyikan | Panel tetap tampil meski `hidden = true` dipanggil | Ganti `hidden` attribute dengan CSS class `.is-active`; ID selector `#photo-comparison { display: flex }` mengalahkan `[hidden] { display: none }` bawaan browser | `style.css`, `scene-manager.js` |
 | CSS specificity conflict fullscreen+interior | `#minimap.is-interior { width: 280px }` override `#minimap.is-fullscreen { width: min(90vw,900px) }` | Tambah `#minimap.is-fullscreen.is-interior { width: min(90vw,900px) }` — specificity 0,3,0 menang | `style.css` |
-| Indikator tidak konsisten normal↔fullscreen | Posisi titik geser saat masuk fullscreen | Pindah `#minimap-indicator` ke dalam `#minimap-img-wrapper` (position:relative); persentase selalu relatif terhadap gambar | `index.html`, `style.css` |
+| Indikator tidak konsisten normal↔fullscreen | Posisi titik geser saat masuk fullscreen | Pindah `#minimap-indicator` ke dalam `#minimap-img-wrapper` (position:relative); persentase selalu relatif terhadap gambar | `viewer.html`, `style.css` |
+| Tombol Kembali tidak muncul di exterior | `backBtn.hidden = true` saat scene exterior | Hapus kondisi — tombol selalu tampil dan arahkan ke `index.html` di semua scene | `scene-manager.js:updateUI()` |
 
 ---
 
@@ -388,6 +411,12 @@ const gfxOptions = {
 };
 const device = await pc.createGraphicsDevice(canvas, gfxOptions);
 app = new pc.Application(canvas, { graphicsDevice: device });
+```
+
+### GSplat component
+```javascript
+entity.addComponent('gsplat', { asset, unified: true });
+// unified: true — default di PlayCanvas 2.19.0, confirmed stabil
 ```
 
 ---
@@ -618,15 +647,19 @@ window.__pc           // akses langsung ke PlayCanvas module
 - Eksterior: 18.1 juta splat. Kelas-if112: 5 juta splat. Sebagian besar scene: 8 juta splat.
 - Mobile tidak supported untuk scene eksterior (262 MB terlalu besar untuk browser mobile).
 - First load lambat (file besar dari R2), subsequent load cepat karena CDN cache + browser cache.
+- **Loading lambat bukan dari engine** — penyebab utama: banyak tab browser menghabiskan GPU memory.
+  Solusi: buka viewer di Incognito atau tutup tab lain terlebih dahulu.
 
 ### Splat Budget (maxSplats) — Belum Diimplementasi
 - PlayCanvas GSplatComponent mendukung parameter `maxSplats` untuk membatasi jumlah splat yang dirender.
 - Trade-off: performa lebih tinggi vs kualitas visual turun.
-- **Perlu diskusi dengan dosbing** sebelum diimplementasi — apakah nilai tertentu acceptable untuk TA.
+- **Perlu diskusi dengan dosbing** sebelum diimplementasi.
 
-### Unified Rendering — Belum Diaktifkan
-- PlayCanvas mendukung mode rendering unified untuk scene kompleks.
-- **Perlu diskusi dengan dosbing** sebelum diaktifkan.
+### Railway Keep-Alive — Belum Di-setup
+- Railway Hobby plan: service sleep setelah ~30 menit tidak ada traffic.
+- Cold start menyebabkan request pertama lambat (~5–10 detik).
+- Solusi: setup UptimeRobot ping ke `https://3dgs-viewer-if-its-production.up.railway.app/api/scenes` setiap 5 menit.
+- **Status: belum dilakukan.**
 
 ### Catatan Vercel — TIDAK Compatible
 Backend ini **tidak compatible** dengan Vercel serverless karena:
@@ -638,7 +671,7 @@ Backend ini **tidak compatible** dengan Vercel serverless karena:
 ### Saran Pengembangan dari Feedback (untuk Bab 5 TA)
 - Indikator sensitivitas kecepatan gerak kamera
 - Vision cone / arah hadap di minimap eksterior
-- Streamed LOD untuk eksterior 18 juta splat (GSplatLod component)
+- Streamed LOD untuk eksterior 18 juta splat (file sudah ada di R2: `exterior-streamed/`)
 - Mobile responsiveness (touch layout belum dioptimalkan)
 - Cloudflare Smart Tiered Cache
 
