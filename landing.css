@@ -122,6 +122,48 @@ body {
 
 .btn-primary:active { transform: translateY(0); }
 
+/* ── Hero Scroll Hint ───────────────────────────────────────────── */
+.hero-scroll-hint {
+  position: absolute;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  animation: scroll-hint-fade-in 1.2s ease 1.4s both;
+}
+
+.hero-scroll-text {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.hero-scroll-arrow {
+  color: rgba(255, 255, 255, 0.55);
+  animation: scroll-arrow-bounce 1.8s ease-in-out infinite;
+}
+
+@keyframes scroll-arrow-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.55; }
+  50%       { transform: translateY(6px); opacity: 1; }
+}
+
+@keyframes scroll-hint-fade-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-scroll-hint { animation: none; }
+  .hero-scroll-arrow { animation: none; }
+}
+
 /* ── About ──────────────────────────────────────────────────────── */
 .about {
   padding: 96px 24px;
