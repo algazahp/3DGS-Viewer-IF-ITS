@@ -132,7 +132,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  animation: scroll-hint-fade-in 1.2s ease 1.4s both;
+  opacity: 1;
 }
 
 .hero-scroll-text {
@@ -142,6 +142,7 @@ body {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
 }
 
 .hero-scroll-arrow {
@@ -154,13 +155,7 @@ body {
   50%       { transform: translateY(6px); opacity: 1; }
 }
 
-@keyframes scroll-hint-fade-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .hero-scroll-hint { animation: none; }
   .hero-scroll-arrow { animation: none; }
 }
 
