@@ -469,14 +469,8 @@ body {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.875rem;
-  color: var(--white);
-  background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+  object-fit: cover;
+  border: 1px solid rgba(17, 24, 39, 0.1);
 }
 
 .team-name {
