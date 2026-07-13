@@ -186,12 +186,71 @@
   <footer class="footer">
     <div class="footer-inner">
       <img src="assets/LogoInformatika.gif" alt="Logo Departemen Teknik Informatika ITS" class="footer-logo" />
-      <p class="footer-name">Al Dhihya Gaza Halim Putra</p>
-      <p class="footer-institution">Institut Teknologi Sepuluh Nopember</p>
-      <p class="footer-year">2026</p>
-      <p class="footer-tech">PlayCanvas · Cloudflare · Railway</p>
+      <p class="footer-desc">
+        Aplikasi Virtual Tour Model 3DGS ini merupakan hasil Tugas Akhir berjudul
+        <em>"Rekonstruksi dan Visualisasi Berbasis Web Model 3D Gaussian Splatting Gedung Teknik Informatika ITS"</em>,
+        Departemen Teknik Informatika, Institut Teknologi Sepuluh Nopember.
+      </p>
+      <p class="footer-desc">
+        Bagian dari Penelitian RKI EQUITY (ITB - ITS - UGM) Tahun 2025 - 2026 berjudul
+        <em>"Splattwin: Integrasi Model 3D Akurat dan Gaussian Splatting untuk Sistem Pemantauan Bencana Cepat"</em>.
+      </p>
+      <button type="button" id="team-toggle" class="footer-team-btn">Tim Pengembang</button>
     </div>
   </footer>
+
+  <!-- ── Modal Tim Pengembang ─────────────────────────────────────── -->
+  <div id="team-overlay" class="team-overlay"></div>
+  <div id="team-modal" class="team-modal" role="dialog" aria-modal="true" aria-labelledby="team-title">
+    <div class="team-header">
+      <span id="team-title">Tim Pengembang</span>
+      <button type="button" id="team-close" class="team-close" aria-label="Tutup">✕</button>
+    </div>
+    <div class="team-body">
+      <div class="team-card">
+        <div class="team-avatar" aria-hidden="true">AG</div>
+        <p class="team-name">Al Dhihya Gaza Halim Putra</p>
+        <p class="team-role">Mahasiswa Tugas Akhir · NRP 5025221288</p>
+        <p class="team-org">Departemen Teknik Informatika, Institut Teknologi Sepuluh Nopember</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" aria-hidden="true">NS</div>
+        <p class="team-name">Prof. Dr. Eng. Nanik Suciati, S.Kom, M.Kom</p>
+        <p class="team-role">Dosen Pembimbing 1 · NIP 197104281994122001</p>
+        <p class="team-org">Departemen Teknik Informatika, Institut Teknologi Sepuluh Nopember</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" aria-hidden="true">RJ</div>
+        <p class="team-name">Rizky Januar Akbar, S.Kom, M.Eng</p>
+        <p class="team-role">Dosen Pembimbing 2 · NIP 198701032014041001</p>
+        <p class="team-org">Departemen Teknik Informatika, Institut Teknologi Sepuluh Nopember</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const teamToggle = document.getElementById('team-toggle');
+    const teamOverlay = document.getElementById('team-overlay');
+    const teamModal = document.getElementById('team-modal');
+    const teamClose = document.getElementById('team-close');
+
+    function openTeamModal() {
+      teamOverlay.classList.add('visible');
+      teamModal.classList.add('visible');
+    }
+
+    function closeTeamModal() {
+      teamOverlay.classList.remove('visible');
+      teamModal.classList.remove('visible');
+    }
+
+    teamToggle.addEventListener('click', openTeamModal);
+    teamClose.addEventListener('click', closeTeamModal);
+    teamOverlay.addEventListener('click', closeTeamModal);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeTeamModal();
+    });
+  </script>
 
 </body>
 
