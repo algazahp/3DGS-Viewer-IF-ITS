@@ -354,11 +354,148 @@ body {
   color: rgba(255, 255, 255, 0.35);
 }
 
-.footer-tech {
+.footer-desc {
+  max-width: 640px;
   font-family: var(--font-body);
   font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.3);
-  letter-spacing: 0.05em;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.footer-desc em {
+  font-style: normal;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.footer-team-btn {
+  margin-top: 4px;
+  padding: 8px 20px;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.footer-team-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Modal Tim Pengembang ───────────────────────────────────────── */
+.team-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 40;
+}
+
+.team-overlay.visible {
+  display: block;
+}
+
+.team-modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(560px, 92vw);
+  max-height: 84vh;
+  background: var(--white);
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 41;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.team-modal.visible {
+  display: block;
+}
+
+.team-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 22px;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--ink);
+}
+
+.team-close {
+  background: none;
+  border: none;
+  font-size: 15px;
+  color: var(--ink-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.team-close:hover {
+  color: var(--ink);
+}
+
+.team-body {
+  padding: 22px;
+  overflow-y: auto;
+  max-height: calc(84vh - 56px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.team-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.team-avatar {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--white);
+  background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+}
+
+.team-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--ink);
+}
+
+.team-role {
+  font-size: 0.75rem;
+  color: var(--ink-mid);
+  margin-top: 2px;
+}
+
+.team-org {
+  font-size: 0.6875rem;
+  color: var(--ink-muted);
+  margin-top: 2px;
 }
 
 /* ── Responsive ─────────────────────────────────────────────────── */
