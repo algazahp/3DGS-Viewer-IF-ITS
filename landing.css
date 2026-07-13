@@ -456,7 +456,7 @@ body {
 
 .team-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 14px;
   padding: 14px;
   border: 1px solid rgba(17, 24, 39, 0.08);
@@ -471,6 +471,12 @@ body {
   border-radius: 50%;
   object-fit: cover;
   border: 1px solid rgba(17, 24, 39, 0.1);
+}
+
+.team-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
 }
 
 .team-name {
